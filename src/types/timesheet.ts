@@ -24,19 +24,20 @@ export interface Subtask {
 
 export interface TimeEntry {
   id: string;
-  employeeId: string;
-  employeeName: string;
-  date: string;
-  projectId: string;
-  taskId: string;
-  subtaskId?: string;
+  employee_id: string;
+  project_id: string;
+  task_id: string;
+  subtask_id?: string | null;
+  entry_date: string;
   hours: number;
-  description: string;
+  description: string | null;
   status: 'draft' | 'submitted' | 'approved' | 'rejected';
-  submittedAt?: string;
-  reviewedAt?: string;
-  reviewedBy?: string;
-  reviewNotes?: string;
+  submitted_at?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by?: string | null;
+  review_notes?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Employee {

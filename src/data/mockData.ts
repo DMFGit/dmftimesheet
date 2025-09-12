@@ -152,30 +152,36 @@ export const mockEmployees: Employee[] = [
 export const mockTimeEntries: TimeEntry[] = [
   {
     id: '1',
-    employeeId: '1',
-    employeeName: 'John Smith',
-    date: '2024-01-15',
-    projectId: '25002',
-    taskId: '1',
-    subtaskId: '1.1',
+    employee_id: '1',
+    entry_date: '2024-01-15',
+    project_id: '1',
+    task_id: '1',
+    subtask_id: '1',
     hours: 4,
     description: 'Working on schematic design drawings',
     status: 'approved',
-    submittedAt: '2024-01-15T17:00:00Z',
-    reviewedAt: '2024-01-16T09:00:00Z',
-    reviewedBy: 'DMF Admin'
+    submitted_at: '2024-01-15T17:00:00Z',
+    reviewed_at: '2024-01-16T09:00:00Z',
+    reviewed_by: '2',
+    review_notes: null,
+    created_at: '2024-01-15T08:00:00Z',
+    updated_at: '2024-01-16T09:00:00Z'
   },
   {
     id: '2',
-    employeeId: '2',
-    employeeName: 'Sarah Johnson',
-    date: '2024-01-15',
-    projectId: '25002',
-    taskId: '2',
-    subtaskId: '2.1',
+    employee_id: '2',
+    entry_date: '2024-01-15',
+    project_id: '1',
+    task_id: '2',
+    subtask_id: '2',
     hours: 6,
     description: 'Preparing pavement plan documentation',
     status: 'submitted',
-    submittedAt: '2024-01-15T18:00:00Z'
+    submitted_at: '2024-01-15T18:00:00Z',
+    reviewed_at: null,
+    reviewed_by: null,
+    review_notes: null,
+    created_at: '2024-01-15T09:00:00Z',
+    updated_at: '2024-01-15T18:00:00Z'
   }
 ];

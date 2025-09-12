@@ -1,78 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
-import { TimeEntryForm } from "@/components/timesheet/time-entry-form";
-import { TimesheetSummary } from "@/components/timesheet/timesheet-summary";
+import { NewTimeEntryForm } from "@/components/timesheet/NewTimeEntryForm";
+import { NewTimesheetSummary } from "@/components/timesheet/NewTimesheetSummary";
+import { AuthForm } from "@/components/auth/AuthForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TimeEntry } from "@/types/timesheet";
-import { mockTimeEntries, mockEmployees } from "@/data/mockData";
 import { CalendarDays, TrendingUp, Users, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useTimeEntries } from "@/hooks/useTimeEntries";
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
-  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(mockTimeEntries);
   const { toast } = useToast();
+  const { user, employee, loading: authLoading } = useAuth();
+  const { 
+    timeEntries, 
+    projects, 
+    loading: timeEntriesLoading, 
+    addTimeEntry, 
+    submitTimesheet 
+  } = useTimeEntries();
 
-  // Mock current user (in real app, this would come from auth)
-  const currentUser = mockEmployees[0]; // John Smith
+  // Show auth form if not authenticated
+  if (authLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
-  const handleNewTimeEntry = (entryData: Omit<TimeEntry, 'id' | 'employeeId' | 'employeeName' | 'status'>) => {
-    const newEntry: TimeEntry = {
-      ...entryData,
-      id: Math.random().toString(36).substr(2, 9),
-      employeeId: currentUser.id,
-      employeeName: currentUser.name,
-      status: 'draft'
-    };
-    
-    setTimeEntries(prev => [...prev, newEntry]);
-    toast({
-      title: "Time entry saved",
-      description: `Added ${entryData.hours} hours to your timesheet.`,
+  if (!user || !employee) {
+    return <AuthForm />;
+  }
+
+  const handleNewTimeEntry = async (entryData: {
+    projectId: string;
+    taskId: string;
+    subtaskId?: string;
+    hours: number;
+    description: string;
+  }) => {
+    await addTimeEntry({
+      project_id: entryData.projectId,
+      task_id: entryData.taskId,
+      subtask_id: entryData.subtaskId,
+      entry_date: selectedDate,
+      hours: entryData.hours,
+      description: entryData.description,
     });
   };
 
-  const handleSubmitForReview = () => {
-    const draftEntries = timeEntries.filter(entry => 
-      entry.status === 'draft' && 
-      entry.date === selectedDate &&
-      entry.employeeId === currentUser.id
-    );
-    
-    if (draftEntries.length === 0) return;
-
-    const updatedEntries = timeEntries.map(entry => {
-      if (entry.status === 'draft' && entry.date === selectedDate && entry.employeeId === currentUser.id) {
-        return {
-          ...entry,
-          status: 'submitted' as const,
-          submittedAt: new Date().toISOString()
-        };
-      }
-      return entry;
-    });
-
-    setTimeEntries(updatedEntries);
-    toast({
-      title: "Timesheet submitted",
-      description: `Your timesheet for ${new Date(selectedDate).toLocaleDateString()} has been submitted for review.`,
-    });
+  const handleSubmitForReview = async () => {
+    await submitTimesheet(selectedDate);
   };
 
   const todaysEntries = timeEntries.filter(entry => 
-    entry.date === selectedDate && entry.employeeId === currentUser.id
+    entry.entry_date === selectedDate
   );
 
   const thisWeekEntries = timeEntries.filter(entry => {
-    const entryDate = new Date(entry.date);
+    const entryDate = new Date(entry.entry_date);
     const today = new Date();
     const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-    return entryDate >= startOfWeek && entry.employeeId === currentUser.id;
+    return entryDate >= startOfWeek;
   });
 
   const weeklyHours = thisWeekEntries.reduce((sum, entry) => sum + entry.hours, 0);
@@ -80,7 +72,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header currentUser={currentUser} />
+      <Header currentUser={employee} />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Dashboard Cards */}
@@ -114,7 +106,7 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Projects</p>
-                  <p className="text-2xl font-bold text-foreground">1</p>
+                  <p className="text-2xl font-bold text-foreground">{projects.length}</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-warning" />
               </div>
@@ -180,12 +172,12 @@ const Index = () => {
 
         {/* Time Entry and Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <TimeEntryForm
+          <NewTimeEntryForm
             onSubmit={handleNewTimeEntry}
             selectedDate={selectedDate}
           />
           
-          <TimesheetSummary
+          <NewTimesheetSummary
             entries={todaysEntries}
             date={selectedDate}
             onSubmitForReview={handleSubmitForReview}
