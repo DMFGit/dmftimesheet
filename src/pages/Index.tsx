@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header";
 import { NewTimeEntryForm } from "@/components/timesheet/NewTimeEntryForm";
 import { NewTimesheetSummary } from "@/components/timesheet/NewTimesheetSummary";
 import { AuthForm } from "@/components/auth/AuthForm";
+import { DemoMode } from "@/components/DemoMode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ const Index = () => {
   }
 
   if (!user || !employee) {
+    // If Supabase is not configured, show demo mode
+    if (!import.meta.env.VITE_SUPABASE_URL) {
+      return <DemoMode selectedDate={selectedDate} setSelectedDate={setSelectedDate} />;
+    }
     return <AuthForm />;
   }
 

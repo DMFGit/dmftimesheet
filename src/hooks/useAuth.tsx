@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Database } from '@/lib/supabase';
 
 type Employee = Database['public']['Tables']['employees']['Row'];
@@ -30,6 +30,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If Supabase is not configured, set loading to false
+    if (!isSupabaseConfigured || !supabase) {
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -56,6 +62,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchEmployee = async (userId: string) => {
+    if (!supabase) return;
+    
     const { data, error } = await supabase
       .from('employees')
       .select('*')
@@ -68,6 +76,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      return { error: 'Supabase is not configured. Please set up your environment variables.' };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -81,6 +93,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
+    if (!supabase) {
+      return { error: 'Supabase is not configured. Please set up your environment variables.' };
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -110,7 +126,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
   };
 
   const value = {
