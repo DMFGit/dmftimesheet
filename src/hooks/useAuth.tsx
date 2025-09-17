@@ -38,14 +38,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initializeAuth = async () => {
+      // Get initial session
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        fetchEmployee(session.user.id);
+        await fetchEmployee(session.user.id);
       }
+      
       setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
@@ -64,14 +69,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchEmployee = async (userId: string) => {
-    const { data, error } = await (supabase as any)
-      .from('Employees')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('Employees')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-    if (data && !error) {
-      setEmployee(data);
+      if (data && !error) {
+        setEmployee(data);
+      } else if (!data) {
+        console.log('No employee record found for user');
+        setEmployee(null);
+      }
+    } catch (err) {
+      console.error('Error fetching employee:', err);
+      setEmployee(null);
     }
   };
 
