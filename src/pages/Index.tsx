@@ -141,59 +141,63 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex justify-center mb-8">
-          <Link to="/weekly">
-            <Button size="lg" className="px-8 py-3">
-              <Calendar className="h-5 w-5 mr-2" />
-              View Weekly Timesheet
-            </Button>
-          </Link>
-        </div>
-
-        {/* Date Selection */}
-        <Card className="shadow-md mb-8">
-          <CardHeader>
-            <CardTitle>Select Date for Time Entry</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-48"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>&nbsp;</Label>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-                    size="sm"
-                  >
-                    Today
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const yesterday = new Date();
-                      yesterday.setDate(yesterday.getDate() - 1);
-                      setSelectedDate(yesterday.toISOString().split('T')[0]);
-                    }}
-                    size="sm"
-                  >
-                    Yesterday
-                  </Button>
+        {/* Date Selection and Navigation */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          <Card className="shadow-md flex-1 max-w-2xl">
+            <CardHeader>
+              <CardTitle>Select Date for Time Entry</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-48"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>&nbsp;</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+                      size="sm"
+                    >
+                      Today
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        setSelectedDate(yesterday.toISOString().split('T')[0]);
+                      }}
+                      size="sm"
+                    >
+                      Yesterday
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center justify-center lg:justify-start">
+            <Link to="/weekly">
+              <Button size="lg" className="px-8 py-6 h-auto">
+                <Calendar className="h-5 w-5 mr-2" />
+                <div className="text-left">
+                  <div className="font-semibold">View Weekly Timesheet</div>
+                  <div className="text-xs opacity-90">Sunday - Saturday overview</div>
+                </div>
+              </Button>
+            </Link>
+          </div>
+        </div>
 
         {/* Time Entry and Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
