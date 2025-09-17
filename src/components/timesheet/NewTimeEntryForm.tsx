@@ -124,8 +124,8 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                   </SelectTrigger>
                   <SelectContent>
                     {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.number} - {project.name}
+                      <SelectItem key={project.project_number} value={project.project_number.toString()}>
+                        {project.project_number} - {project.project_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -143,9 +143,9 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                     <SelectValue placeholder="Select task" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getTasksByProject(entry.projectId).map((task) => (
-                      <SelectItem key={task.id} value={task.id}>
-                        {task.number} - {task.description}
+                    {getTasksByProject(parseInt(entry.projectId)).map((task) => (
+                      <SelectItem key={task.task_number} value={task.task_number.toString()}>
+                        {task.task_number} - {task.task_description}
                       </SelectItem>
                     ))}
                   </SelectContent>
