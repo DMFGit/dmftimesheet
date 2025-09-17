@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      Employees: {
+        Row: {
+          active: boolean
+          "Default Billing Rate": number | null
+          email: string | null
+          id: string
+          name: string
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          "Default Billing Rate"?: number | null
+          email?: string | null
+          id?: string
+          name: string
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          "Default Billing Rate"?: number | null
+          email?: string | null
+          id?: string
+          name?: string
+          role?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      Project_Budgets: {
+        Row: {
+          Budget: string | null
+          Contract: string | null
+          DMF_Budget: string | null
+          Fee_Structure: string | null
+          "Project_#": number | null
+          Project_Name: string | null
+          "Subtask_#": number | null
+          Subtask_Description: string | null
+          "Task_#": number | null
+          Task_Description: string | null
+          Task_Unit: string | null
+          Vendor: string | null
+          Vendor_Budget: string | null
+          "WBS Code": string
+        }
+        Insert: {
+          Budget?: string | null
+          Contract?: string | null
+          DMF_Budget?: string | null
+          Fee_Structure?: string | null
+          "Project_#"?: number | null
+          Project_Name?: string | null
+          "Subtask_#"?: number | null
+          Subtask_Description?: string | null
+          "Task_#"?: number | null
+          Task_Description?: string | null
+          Task_Unit?: string | null
+          Vendor?: string | null
+          Vendor_Budget?: string | null
+          "WBS Code": string
+        }
+        Update: {
+          Budget?: string | null
+          Contract?: string | null
+          DMF_Budget?: string | null
+          Fee_Structure?: string | null
+          "Project_#"?: number | null
+          Project_Name?: string | null
+          "Subtask_#"?: number | null
+          Subtask_Description?: string | null
+          "Task_#"?: number | null
+          Task_Description?: string | null
+          Task_Unit?: string | null
+          Vendor?: string | null
+          Vendor_Budget?: string | null
+          "WBS Code"?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
