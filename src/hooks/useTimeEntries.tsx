@@ -168,6 +168,21 @@ export const useTimeEntries = () => {
   
   const getProjectByNumber = (projectNumber: number) => projects.find(p => p.project_number === projectNumber);
   
+  // Get unique projects (deduplicated by project number)
+  const getUniqueProjects = () => {
+    const unique = new Map();
+    projects.forEach(project => {
+      if (!unique.has(project.project_number)) {
+        unique.set(project.project_number, {
+          project_number: project.project_number,
+          project_name: project.project_name,
+          contract: project.contract // Keep first contract found for reference
+        });
+      }
+    });
+    return Array.from(unique.values());
+  };
+  
   const getTasksByProject = (projectNumber: number) => 
     tasks.filter(t => t.project_number === projectNumber);
   
@@ -220,6 +235,7 @@ export const useTimeEntries = () => {
     submitTimesheet,
     getBudgetItemByWbsCode,
     getProjectByNumber,
+    getUniqueProjects,
     getTasksByProject,
     getBudgetItemsByProject,
     getBudgetItemsByTask,

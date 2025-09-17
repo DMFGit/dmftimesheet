@@ -23,6 +23,7 @@ const Index = () => {
     timeEntries, 
     projects,
     budgetItems,
+    getUniqueProjects,
     loading: timeEntriesLoading, 
     addTimeEntry, 
     submitTimesheet 
@@ -119,7 +120,7 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Projects</p>
-                  <p className="text-2xl font-bold text-foreground">{projects.length}</p>
+                  <p className="text-2xl font-bold text-foreground">{getUniqueProjects().length}</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-warning" />
               </div>

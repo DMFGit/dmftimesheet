@@ -28,7 +28,13 @@ interface FormEntry {
 }
 
 export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps) => {
-  const { projects, getTasksByProject, getSubtasksByTask, loading } = useTimeEntries();
+  const { 
+    projects, 
+    getTasksByProject, 
+    getSubtasksByTask, 
+    getUniqueProjects,
+    loading 
+  } = useTimeEntries();
   
   const [entries, setEntries] = useState<FormEntry[]>([{
     projectId: '',
@@ -123,9 +129,9 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map((project, index) => (
-                      <SelectItem key={`${project.project_number}-${project.contract}-${index}`} value={project.project_number.toString()}>
-                        {project.project_number} - {project.project_name} ({project.contract})
+                    {getUniqueProjects().map((project) => (
+                      <SelectItem key={project.project_number} value={project.project_number.toString()}>
+                        {project.project_number} - {project.project_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
