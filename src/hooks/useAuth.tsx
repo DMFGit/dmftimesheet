@@ -1,9 +1,17 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { Database } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
-type Employee = Database['public']['Tables']['employees']['Row'];
+type Employee = {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string;
+  role: string;
+  active: boolean;
+  "Default Billing Rate": number;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -30,12 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If Supabase is not configured, set loading to false
-    if (!isSupabaseConfigured || !supabase) {
-      setLoading(false);
-      return;
-    }
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -62,10 +64,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const fetchEmployee = async (userId: string) => {
-    if (!supabase) return;
-    
-    const { data, error } = await supabase
-      .from('employees')
+    const { data, error } = await (supabase as any)
+      .from('Employees')
       .select('*')
       .eq('user_id', userId)
       .single();
@@ -76,10 +76,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) {
-      return { error: 'Supabase is not configured. Please set up your environment variables.' };
-    }
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -93,10 +89,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    if (!supabase) {
-      return { error: 'Supabase is not configured. Please set up your environment variables.' };
-    }
-
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -108,8 +100,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (data.user) {
       // Create employee record
-      const { error: employeeError } = await supabase
-        .from('employees')
+      const { error: employeeError } = await (supabase as any)
+        .from('Employees')
         .insert({
           user_id: data.user.id,
           name,
@@ -126,9 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    if (supabase) {
-      await supabase.auth.signOut();
-    }
+    await supabase.auth.signOut();
   };
 
   const value = {

@@ -22,8 +22,8 @@ export const BudgetReport = () => {
   const { employee } = useAuth();
   const [budgetAnalysis, setBudgetAnalysis] = useState<BudgetAnalysis[]>([]);
   
-  // Assuming a standard hourly rate for calculations
-  const hourlyRate = employee?.hourly_rate || 75; // Default rate if not set
+  // Get the hourly rate from the employee data
+  const hourlyRate = employee?.["Default Billing Rate"] || 75; // Default rate if not set
 
   useEffect(() => {
     if (timeEntries.length === 0 || subtasks.length === 0) return;
