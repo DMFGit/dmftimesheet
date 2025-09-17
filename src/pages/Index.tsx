@@ -19,6 +19,8 @@ const Index = () => {
   );
   const { toast } = useToast();
   const { user, employee, loading: authLoading } = useAuth();
+  
+  console.log('Auth state:', { user: !!user, employee: !!employee, authLoading });
   const { 
     timeEntries, 
     projects,
