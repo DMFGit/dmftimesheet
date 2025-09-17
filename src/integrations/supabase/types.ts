@@ -95,6 +95,223 @@ export type Database = {
         }
         Relationships: []
       }
+      Projects: {
+        Row: {
+          active: boolean
+          contract: string | null
+          created_at: string
+          dmf_budget: string | null
+          id: string
+          name: string
+          project_number: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          contract?: string | null
+          created_at?: string
+          dmf_budget?: string | null
+          id?: string
+          name: string
+          project_number: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          contract?: string | null
+          created_at?: string
+          dmf_budget?: string | null
+          id?: string
+          name?: string
+          project_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      Subtasks: {
+        Row: {
+          active: boolean
+          budget: number | null
+          created_at: string
+          description: string
+          fee_structure: string | null
+          id: string
+          subtask_number: number
+          task_id: string
+          updated_at: string
+          vendor: string | null
+          vendor_budget: string | null
+          wbs_code: string
+        }
+        Insert: {
+          active?: boolean
+          budget?: number | null
+          created_at?: string
+          description: string
+          fee_structure?: string | null
+          id?: string
+          subtask_number: number
+          task_id: string
+          updated_at?: string
+          vendor?: string | null
+          vendor_budget?: string | null
+          wbs_code: string
+        }
+        Update: {
+          active?: boolean
+          budget?: number | null
+          created_at?: string
+          description?: string
+          fee_structure?: string | null
+          id?: string
+          subtask_number?: number
+          task_id?: string
+          updated_at?: string
+          vendor?: string | null
+          vendor_budget?: string | null
+          wbs_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Subtasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "Tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Tasks: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          id: string
+          project_id: string
+          task_number: number
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description: string
+          id?: string
+          project_id: string
+          task_number: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          id?: string
+          project_id?: string
+          task_number?: number
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "Projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Time_Entries: {
+        Row: {
+          created_at: string
+          description: string | null
+          employee_id: string
+          entry_date: string
+          hours: number
+          id: string
+          project_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string | null
+          subtask_id: string | null
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          entry_date: string
+          hours: number
+          id?: string
+          project_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          subtask_id?: string | null
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          entry_date?: string
+          hours?: number
+          id?: string
+          project_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          subtask_id?: string | null
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Time_Entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "Employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Time_Entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "Projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Time_Entries_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "Employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Time_Entries_subtask_id_fkey"
+            columns: ["subtask_id"]
+            isOneToOne: false
+            referencedRelation: "Subtasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Time_Entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "Tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
