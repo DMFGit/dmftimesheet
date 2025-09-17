@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { Plus, Trash2 } from "lucide-react";
+import { parseDateSafe } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface TimeEntryFormProps {
   onSubmit: (entryData: {
@@ -100,7 +102,7 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Time Entry for {new Date(selectedDate).toLocaleDateString()}
+          Time Entry for {format(parseDateSafe(selectedDate), 'MMM d, yyyy')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

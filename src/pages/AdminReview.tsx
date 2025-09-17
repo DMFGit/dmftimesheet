@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Clock, User, FileText, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { parseDateSafe } from '@/lib/utils';
 
 interface TimeEntryWithEmployee extends TimeEntry {
   employee_name?: string;
@@ -179,7 +180,7 @@ export default function AdminReview() {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
-                      {format(new Date(entry.entry_date), 'MMM d, yyyy')}
+                      {format(parseDateSafe(entry.entry_date), 'MMM d, yyyy')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
