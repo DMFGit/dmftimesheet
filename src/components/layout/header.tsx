@@ -1,14 +1,15 @@
-import { Clock, User } from "lucide-react";
+import { Clock, User, Shield, FileCheck, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { Link, useLocation } from "react-router-dom";
 
-interface HeaderProps {
-  currentUser?: {
-    name: string;
-    role: string;
-  };
-}
+export function Header() {
+  const { user, employee, signOut } = useAuth();
+  const location = useLocation();
+  
+  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
 
-export function Header({ currentUser }: HeaderProps) {
   return (
     <header className="bg-gradient-primary shadow-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,27 +19,57 @@ export function Header({ currentUser }: HeaderProps) {
               <Clock className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">DMF Timesheet</h1>
-              <p className="text-primary-light/80 text-sm">Civil Engineering Time Tracking</p>
+              <Link to="/" className="block">
+                <h1 className="text-xl font-bold text-white hover:text-primary-light/90 transition-colors">
+                  DMF Timesheet
+                </h1>
+                <p className="text-primary-light/80 text-sm">Civil Engineering Time Tracking</p>
+              </Link>
             </div>
           </div>
-          
-          {currentUser && (
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-white font-medium">{currentUser.name}</p>
-                <p className="text-primary-light/80 text-sm capitalize">{currentUser.role}</p>
+
+          <div className="flex items-center space-x-4">
+            {/* Admin Review Link */}
+            {isAdmin && (
+              <Link to="/admin/review">
+                <Button 
+                  variant={location.pathname === '/admin/review' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="text-white hover:bg-white/20 border-white/20"
+                >
+                  <FileCheck className="h-4 w-4 mr-2" />
+                  Review
+                </Button>
+              </Link>
+            )}
+
+            {/* User Info */}
+            {employee && (
+              <div className="flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-white font-medium">{employee.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-primary-light/80 text-sm capitalize">{employee.role}</p>
+                    {isAdmin && (
+                      <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => signOut()}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-              >
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>
