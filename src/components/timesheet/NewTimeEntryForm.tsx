@@ -152,6 +152,7 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                     {getTasksByProject(parseInt(entry.projectId)).map((task) => (
                       <SelectItem key={task.task_number} value={task.task_number.toString()}>
                         {task.task_number} - {task.task_description}
+                        {task.task_unit && <span className="text-muted-foreground ml-2">({task.task_unit})</span>}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -169,12 +170,16 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                     <SelectValue placeholder="Select subtask" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getSubtasksByTask(entry.taskId).map((subtask) => (
-                      <SelectItem key={subtask.id} value={subtask.id}>
-                        {subtask.number} - {subtask.description}
-                        {subtask.wbs_code && ` (${subtask.wbs_code})`}
-                      </SelectItem>
-                    ))}
+                    {getSubtasksByTask(entry.taskId).map((subtask) => {
+                      const parentTask = getTasksByProject(parseInt(entry.projectId)).find(t => t.task_number.toString() === entry.taskId);
+                      return (
+                        <SelectItem key={subtask.id} value={subtask.id}>
+                          {subtask.number} - {subtask.description}
+                          {parentTask?.task_unit && <span className="text-muted-foreground ml-2">({parentTask.task_unit})</span>}
+                          {subtask.wbs_code && <span className="text-xs text-muted-foreground ml-2">[{subtask.wbs_code}]</span>}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
