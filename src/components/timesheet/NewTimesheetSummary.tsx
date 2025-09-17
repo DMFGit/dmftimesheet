@@ -11,7 +11,7 @@ interface TimesheetSummaryProps {
 }
 
 export const NewTimesheetSummary = ({ entries, date, onSubmitForReview }: TimesheetSummaryProps) => {
-  const { getProjectById, getTaskById, getSubtaskById } = useTimeEntries();
+  const { getBudgetItemByWbsCode } = useTimeEntries();
 
   if (entries.length === 0) {
     return (
@@ -41,28 +41,24 @@ export const NewTimesheetSummary = ({ entries, date, onSubmitForReview }: Timesh
       </CardHeader>
       <CardContent className="space-y-4">
         {entries.map((entry) => {
-          const project = getProjectById(entry.project_id);
-          const task = getTaskById(entry.task_id);
-          const subtask = entry.subtask_id ? getSubtaskById(entry.subtask_id) : null;
+          const budgetItem = getBudgetItemByWbsCode(entry.wbs_code);
 
           return (
             <div key={entry.id} className="border rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-start">
                 <div className="space-y-1 flex-1">
                   <h4 className="font-medium">
-                    {project?.number} - {project?.name}
+                    {budgetItem?.project_number} - {budgetItem?.project_name}
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    {task?.number} - {task?.description}
+                    {budgetItem?.task_number} - {budgetItem?.task_description}
                   </p>
-                  {subtask && (
+                  {budgetItem && (
                     <p className="text-xs text-muted-foreground">
-                      {subtask.number} - {subtask.description}
-                      {subtask.wbs_code && (
-                        <span className="ml-2 font-mono bg-secondary px-1 rounded">
-                          {subtask.wbs_code}
-                        </span>
-                      )}
+                      {budgetItem.subtask_number} - {budgetItem.subtask_description}
+                      <span className="ml-2 font-mono bg-secondary px-1 rounded">
+                        {budgetItem.wbs_code}
+                      </span>
                     </p>
                   )}
                   {entry.description && (

@@ -21,7 +21,8 @@ const Index = () => {
   const { user, employee, loading: authLoading } = useAuth();
   const { 
     timeEntries, 
-    projects, 
+    projects,
+    budgetItems,
     loading: timeEntriesLoading, 
     addTimeEntry, 
     submitTimesheet 
@@ -47,10 +48,21 @@ const Index = () => {
     hours: number;
     description: string;
   }) => {
+    // Find the WBS code for the selected subtask
+    const subtaskNumber = entryData.subtaskId ? parseFloat(entryData.subtaskId) : 0;
+    const budgetItem = budgetItems.find(item => 
+      item.project_number === parseInt(entryData.projectId) &&
+      item.task_number === parseInt(entryData.taskId) &&
+      item.subtask_number === subtaskNumber
+    );
+    
+    if (!budgetItem) {
+      console.error('Could not find WBS code for selected subtask');
+      return;
+    }
+
     await addTimeEntry({
-      project_id: entryData.projectId,
-      task_id: entryData.taskId,
-      subtask_id: entryData.subtaskId,
+      wbs_code: budgetItem.wbs_code,
       entry_date: selectedDate,
       hours: entryData.hours,
       description: entryData.description,

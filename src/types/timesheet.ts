@@ -1,33 +1,35 @@
-export interface Project {
-  id: string;
-  name: string;
-  number: string;
+export interface ProjectHierarchy {
+  project_number: number;
+  project_name: string;
+  contract: string;
 }
 
-export interface Task {
-  id: string;
-  number: string;
-  unit: string;
-  description: string;
-  projectId: string;
+export interface TaskHierarchy {
+  project_number: number;
+  task_number: number;
+  task_description: string;
+  task_unit: string;
 }
 
-export interface Subtask {
-  id: string;
-  number: string;
-  description: string;
-  taskId: string;
-  wbsCode: string;
-  budget: number;
-  feeStructure: string;
+export interface BudgetItem {
+  wbs_code: string;
+  project_number: number;
+  project_name: string;
+  contract: string;
+  task_number: number;
+  task_description: string;
+  task_unit: string;
+  subtask_number: number;
+  subtask_description: string;
+  fee_structure: string;
+  budget_amount: number;
+  dmf_budget_amount: number;
 }
 
 export interface TimeEntry {
   id: string;
   employee_id: string;
-  project_id: string;
-  task_id: string;
-  subtask_id?: string | null;
+  wbs_code: string;
   entry_date: string;
   hours: number;
   description: string | null;

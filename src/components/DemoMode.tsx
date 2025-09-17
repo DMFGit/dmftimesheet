@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, TrendingUp, Users, CheckCircle, Database, ExternalLink } from "lucide-react";
-import { mockEmployees, mockProjects, mockTasks, mockSubtasks, mockTimeEntries } from "@/data/mockData";
+import { mockEmployees, mockBudgetItems, mockTimeEntries } from "@/data/mockData";
 
 interface DemoModeProps {
   selectedDate: string;
@@ -107,7 +107,7 @@ export const DemoMode = ({ selectedDate, setSelectedDate }: DemoModeProps) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Projects</p>
-                  <p className="text-2xl font-bold text-foreground">{mockProjects.length}</p>
+                  <p className="text-2xl font-bold text-foreground">{new Set(mockBudgetItems.map(item => item.project_number)).size}</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-warning" />
               </div>
@@ -185,8 +185,8 @@ export const DemoMode = ({ selectedDate, setSelectedDate }: DemoModeProps) => {
                 <div className="mt-4 space-y-2">
                   <p className="text-sm"><strong>Available Projects:</strong></p>
                   <ul className="text-sm space-y-1 ml-4">
-                    {mockProjects.slice(0, 2).map(project => (
-                      <li key={project.id}>• {project.number} - {project.name}</li>
+                    {Array.from(new Set(mockBudgetItems.map(item => `${item.project_number} - ${item.project_name}`))).slice(0, 2).map(project => (
+                      <li key={project}>• {project}</li>
                     ))}
                   </ul>
                 </div>
@@ -200,28 +200,24 @@ export const DemoMode = ({ selectedDate, setSelectedDate }: DemoModeProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               {mockTimeEntries.slice(0, 2).map((entry) => {
-                const project = mockProjects.find(p => p.id === entry.project_id);
-                const task = mockTasks.find(t => t.id === entry.task_id);
-                const subtask = mockSubtasks.find(s => s.id === entry.subtask_id);
+                const budgetItem = mockBudgetItems.find(item => item.wbs_code === entry.wbs_code);
 
                 return (
                   <div key={entry.id} className="border rounded-lg p-4 space-y-2">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1 flex-1">
                         <h4 className="font-medium">
-                          {project?.number} - {project?.name}
+                          {budgetItem?.project_number} - {budgetItem?.project_name}
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {task?.number} - {task?.description}
+                          {budgetItem?.task_number} - {budgetItem?.task_description}
                         </p>
-                        {subtask && (
+                        {budgetItem && (
                           <p className="text-xs text-muted-foreground">
-                            {subtask.number} - {subtask.description}
-                            {subtask.wbsCode && (
-                              <span className="ml-2 font-mono bg-secondary px-1 rounded">
-                                {subtask.wbsCode}
-                              </span>
-                            )}
+                            {budgetItem.subtask_number} - {budgetItem.subtask_description}
+                            <span className="ml-2 font-mono bg-secondary px-1 rounded">
+                              {budgetItem.wbs_code}
+                            </span>
                           </p>
                         )}
                         <p className="text-sm text-foreground mt-2">

@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import type { BudgetItem, ProjectHierarchy, TaskHierarchy } from '@/types/timesheet';
 
 export interface TimeEntry {
   id: string;
   employee_id: string;
-  project_id: string;
-  task_id: string;
-  subtask_id: string | null;
+  wbs_code: string;
   entry_date: string;
   hours: number;
   description: string | null;
@@ -21,37 +20,11 @@ export interface TimeEntry {
   updated_at: string;
 }
 
-export interface Project {
-  id: string;
-  name: string;
-  number: string;
-  description: string | null;
-  status: 'active' | 'inactive' | 'completed';
-}
-
-export interface Task {
-  id: string;
-  project_id: string;
-  number: string;
-  unit: string | null;
-  description: string;
-}
-
-export interface Subtask {
-  id: string;
-  task_id: string;
-  number: string;
-  description: string;
-  wbs_code: string | null;
-  budget: number;
-  fee_structure: string | null;
-}
-
 export const useTimeEntries = () => {
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [projects, setProjects] = useState<ProjectHierarchy[]>([]);
+  const [tasks, setTasks] = useState<TaskHierarchy[]>([]);
   const [loading, setLoading] = useState(false);
   const { employee } = useAuth();
   const { toast } = useToast();
@@ -60,9 +33,7 @@ export const useTimeEntries = () => {
   useEffect(() => {
     if (employee) {
       fetchTimeEntries();
-      fetchProjects();
-      fetchTasks();
-      fetchSubtasks();
+      fetchBudgetData();
     }
   }, [employee]);
 
@@ -70,7 +41,7 @@ export const useTimeEntries = () => {
     if (!employee) return;
 
     const { data, error } = await supabase
-      .from('time_entries')
+      .from('Time_Entries')
       .select('*')
       .eq('employee_id', employee.id)
       .order('entry_date', { ascending: false });
@@ -84,56 +55,50 @@ export const useTimeEntries = () => {
       return;
     }
 
-    setTimeEntries(data || []);
+    setTimeEntries((data || []) as TimeEntry[]);
   };
 
-  const fetchProjects = async () => {
-    const { data, error } = await supabase
-      .from('projects')
+  const fetchBudgetData = async () => {
+    // Fetch budget items from the view
+    const { data: budgetData, error: budgetError } = await supabase
+      .from('budget_items')
       .select('*')
-      .eq('status', 'active')
-      .order('name');
+      .order('project_number, task_number, subtask_number');
 
-    if (error) {
-      console.error('Error fetching projects:', error);
+    if (budgetError) {
+      console.error('Error fetching budget items:', budgetError);
       return;
     }
 
-    setProjects(data || []);
-  };
+    setBudgetItems(budgetData || []);
 
-  const fetchTasks = async () => {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .order('number');
+    // Fetch project hierarchy
+    const { data: projectData, error: projectError } = await supabase
+      .from('project_hierarchy')
+      .select('*');
 
-    if (error) {
-      console.error('Error fetching tasks:', error);
+    if (projectError) {
+      console.error('Error fetching projects:', projectError);
       return;
     }
 
-    setTasks(data || []);
-  };
+    setProjects(projectData || []);
 
-  const fetchSubtasks = async () => {
-    const { data, error } = await supabase
-      .from('subtasks')
-      .select('*')
-      .order('number');
+    // Fetch task hierarchy
+    const { data: taskData, error: taskError } = await supabase
+      .from('task_hierarchy')  
+      .select('*');
 
-    if (error) {
-      console.error('Error fetching subtasks:', error);
+    if (taskError) {
+      console.error('Error fetching tasks:', taskError);
       return;
     }
 
-    setSubtasks(data || []);
+    setTasks(taskData || []);
   };
 
   const addTimeEntry = async (entryData: {
-    project_id: string;
-    task_id: string;
-    subtask_id?: string;
+    wbs_code: string;
     entry_date: string;
     hours: number;
     description?: string;
@@ -142,7 +107,7 @@ export const useTimeEntries = () => {
 
     setLoading(true);
     const { data, error } = await supabase
-      .from('time_entries')
+      .from('Time_Entries')
       .insert({
         employee_id: employee.id,
         ...entryData,
@@ -157,7 +122,7 @@ export const useTimeEntries = () => {
         variant: "destructive",
       });
     } else {
-      setTimeEntries(prev => [data, ...prev]);
+      setTimeEntries(prev => [data as TimeEntry, ...prev]);
       toast({
         title: "Time entry saved",
         description: `Added ${entryData.hours} hours to your timesheet.`,
@@ -172,7 +137,7 @@ export const useTimeEntries = () => {
 
     setLoading(true);
     const { error } = await supabase
-      .from('time_entries')
+      .from('Time_Entries')
       .update({
         status: 'submitted',
         submitted_at: new Date().toISOString(),
@@ -198,25 +163,84 @@ export const useTimeEntries = () => {
     setLoading(false);
   };
 
-  const getProjectById = (id: string) => projects.find(p => p.id === id);
-  const getTaskById = (id: string) => tasks.find(t => t.id === id);
-  const getSubtaskById = (id: string) => subtasks.find(s => s.id === id);
-  const getTasksByProject = (projectId: string) => tasks.filter(t => t.project_id === projectId);
-  const getSubtasksByTask = (taskId: string) => subtasks.filter(s => s.task_id === taskId);
+  // Helper functions to work with the new structure
+  const getBudgetItemByWbsCode = (wbsCode: string) => budgetItems.find(item => item.wbs_code === wbsCode);
+  
+  const getProjectByNumber = (projectNumber: number) => projects.find(p => p.project_number === projectNumber);
+  
+  const getTasksByProject = (projectNumber: number) => 
+    tasks.filter(t => t.project_number === projectNumber);
+  
+  const getBudgetItemsByProject = (projectNumber: number) => 
+    budgetItems.filter(item => item.project_number === projectNumber);
+  
+  const getBudgetItemsByTask = (projectNumber: number, taskNumber: number) => 
+    budgetItems.filter(item => item.project_number === projectNumber && item.task_number === taskNumber);
+
+  // Legacy compatibility functions (for components that haven't been updated yet)
+  const getProjectById = (id: string) => {
+    const projectNumber = parseInt(id);
+    const project = getProjectByNumber(projectNumber);
+    return project ? {
+      id: project.project_number.toString(),
+      name: project.project_name,
+      number: project.project_number.toString(),
+    } : null;
+  };
+
+  const getTaskById = (id: string) => {
+    const budgetItem = budgetItems.find(item => item.task_number.toString() === id);
+    return budgetItem ? {
+      id: budgetItem.task_number.toString(),
+      number: budgetItem.task_number.toString(),
+      description: budgetItem.task_description,
+      unit: budgetItem.task_unit,
+    } : null;
+  };
+
+  const getSubtaskById = (id: string) => {
+    const budgetItem = budgetItems.find(item => item.subtask_number.toString() === id);
+    return budgetItem ? {
+      id: budgetItem.subtask_number.toString(),
+      number: budgetItem.subtask_number.toString(),
+      description: budgetItem.subtask_description,
+      wbs_code: budgetItem.wbs_code,
+      budget: budgetItem.budget_amount,
+      fee_structure: budgetItem.fee_structure,
+    } : null;
+  };
 
   return {
     timeEntries,
+    budgetItems,
     projects,
     tasks,
-    subtasks,
     loading,
     addTimeEntry,
     submitTimesheet,
+    getBudgetItemByWbsCode,
+    getProjectByNumber,
+    getTasksByProject,
+    getBudgetItemsByProject,
+    getBudgetItemsByTask,
+    // Legacy compatibility
     getProjectById,
     getTaskById,
     getSubtaskById,
-    getTasksByProject,
-    getSubtasksByTask,
+    getSubtasksByTask: (taskId: string) => {
+      const taskNumber = parseInt(taskId);
+      return budgetItems
+        .filter(item => item.task_number === taskNumber)
+        .map(item => ({
+          id: item.subtask_number.toString(),
+          task_id: taskNumber.toString(),
+          number: item.subtask_number.toString(),
+          description: item.subtask_description,
+          wbs_code: item.wbs_code,
+          budget: item.budget_amount,
+          fee_structure: item.fee_structure,
+        }));
+    },
     refreshData: fetchTimeEntries,
   };
 };

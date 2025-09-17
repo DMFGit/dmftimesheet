@@ -6,10 +6,12 @@ import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useAuth } from "@/hooks/useAuth";
 
 interface BudgetAnalysis {
-  subtaskId: string;
-  subtaskNumber: string;
-  subtaskDescription: string;
   wbsCode: string;
+  projectNumber: number;
+  projectName: string;
+  contract: string;
+  subtaskNumber: number;
+  subtaskDescription: string;
   budgetAmount: number;
   totalHours: number;
   totalCost: number;
@@ -18,7 +20,7 @@ interface BudgetAnalysis {
 }
 
 export const BudgetReport = () => {
-  const { timeEntries, subtasks, getSubtaskById } = useTimeEntries();
+  const { timeEntries, budgetItems } = useTimeEntries();
   const { employee } = useAuth();
   const [budgetAnalysis, setBudgetAnalysis] = useState<BudgetAnalysis[]>([]);
   
@@ -26,18 +28,18 @@ export const BudgetReport = () => {
   const hourlyRate = employee?.["Default Billing Rate"] || 75; // Default rate if not set
 
   useEffect(() => {
-    if (timeEntries.length === 0 || subtasks.length === 0) return;
+    if (timeEntries.length === 0 || budgetItems.length === 0) return;
 
     const analysis: BudgetAnalysis[] = [];
 
-    subtasks.forEach(subtask => {
+    budgetItems.forEach(item => {
       const relatedEntries = timeEntries.filter(entry => 
-        entry.subtask_id === subtask.id && entry.status === 'approved'
+        entry.wbs_code === item.wbs_code && entry.status === 'approved'
       );
 
       const totalHours = relatedEntries.reduce((sum, entry) => sum + entry.hours, 0);
       const totalCost = totalHours * hourlyRate;
-      const utilizationPercent = subtask.budget > 0 ? (totalCost / subtask.budget) * 100 : 0;
+      const utilizationPercent = item.budget_amount > 0 ? (totalCost / item.budget_amount) * 100 : 0;
 
       let status: 'under-budget' | 'on-track' | 'over-budget';
       if (utilizationPercent <= 75) {
@@ -49,11 +51,13 @@ export const BudgetReport = () => {
       }
 
       analysis.push({
-        subtaskId: subtask.id,
-        subtaskNumber: subtask.number,
-        subtaskDescription: subtask.description,
-        wbsCode: subtask.wbs_code || '',
-        budgetAmount: subtask.budget,
+        wbsCode: item.wbs_code,
+        projectNumber: item.project_number,
+        projectName: item.project_name,
+        contract: item.contract,
+        subtaskNumber: item.subtask_number,
+        subtaskDescription: item.subtask_description,
+        budgetAmount: item.budget_amount,
         totalHours,
         totalCost,
         utilizationPercent,
@@ -64,7 +68,7 @@ export const BudgetReport = () => {
     // Sort by utilization percentage (highest first)
     analysis.sort((a, b) => b.utilizationPercent - a.utilizationPercent);
     setBudgetAnalysis(analysis);
-  }, [timeEntries, subtasks, hourlyRate]);
+  }, [timeEntries, budgetItems, hourlyRate]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -124,6 +128,8 @@ export const BudgetReport = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>WBS Code</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Contract</TableHead>
                 <TableHead>Subtask</TableHead>
                 <TableHead className="text-right">Budget</TableHead>
                 <TableHead className="text-right">Hours</TableHead>
@@ -134,9 +140,20 @@ export const BudgetReport = () => {
             </TableHeader>
             <TableBody>
               {budgetAnalysis.map((item) => (
-                <TableRow key={item.subtaskId}>
+                <TableRow key={item.wbsCode}>
                   <TableCell className="font-mono text-sm">
                     {item.wbsCode}
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{item.projectNumber}</div>
+                      <div className="text-sm text-muted-foreground truncate max-w-[200px]">
+                        {item.projectName}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{item.contract}</span>
                   </TableCell>
                   <TableCell>
                     <div>
