@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarDays, TrendingUp, Users, CheckCircle } from "lucide-react";
+import { CalendarDays, TrendingUp, Users, CheckCircle, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState(
@@ -138,6 +139,16 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="flex justify-center mb-8">
+          <Link to="/weekly">
+            <Button size="lg" className="px-8 py-3">
+              <Calendar className="h-5 w-5 mr-2" />
+              View Weekly Timesheet
+            </Button>
+          </Link>
         </div>
 
         {/* Date Selection */}

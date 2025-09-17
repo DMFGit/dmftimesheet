@@ -1,4 +1,4 @@
-import { Clock, User, Shield, FileCheck, LogOut, Calendar } from "lucide-react";
+import { Clock, User, Shield, FileCheck, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,18 +26,6 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Weekly Timesheet Link */}
-            <Link to="/weekly">
-              <Button 
-                variant={location.pathname === '/weekly' ? 'secondary' : 'ghost'}
-                size="sm"
-                className="text-foreground hover:bg-primary/20"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Weekly View
-              </Button>
-            </Link>
-
             {/* Admin Review Link */}
             {isAdmin && (
               <Link to="/admin/review">
