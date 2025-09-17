@@ -230,15 +230,13 @@ export type Database = {
           entry_date: string
           hours: number
           id: string
-          project_id: string
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
           submitted_at: string | null
-          subtask_id: string | null
-          task_id: string
           updated_at: string
+          wbs_code: string
         }
         Insert: {
           created_at?: string
@@ -247,15 +245,13 @@ export type Database = {
           entry_date: string
           hours: number
           id?: string
-          project_id: string
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           submitted_at?: string | null
-          subtask_id?: string | null
-          task_id: string
           updated_at?: string
+          wbs_code: string
         }
         Update: {
           created_at?: string
@@ -264,29 +260,34 @@ export type Database = {
           entry_date?: string
           hours?: number
           id?: string
-          project_id?: string
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
           submitted_at?: string | null
-          subtask_id?: string | null
-          task_id?: string
           updated_at?: string
+          wbs_code?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_time_entries_wbs_code"
+            columns: ["wbs_code"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["wbs_code"]
+          },
+          {
+            foreignKeyName: "fk_time_entries_wbs_code"
+            columns: ["wbs_code"]
+            isOneToOne: false
+            referencedRelation: "Project_Budgets"
+            referencedColumns: ["WBS Code"]
+          },
           {
             foreignKeyName: "Time_Entries_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "Employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "Time_Entries_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "Projects"
             referencedColumns: ["id"]
           },
           {
@@ -296,25 +297,72 @@ export type Database = {
             referencedRelation: "Employees"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "Time_Entries_subtask_id_fkey"
-            columns: ["subtask_id"]
-            isOneToOne: false
-            referencedRelation: "Subtasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "Time_Entries_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "Tasks"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      budget_items: {
+        Row: {
+          budget_amount: number | null
+          contract: string | null
+          dmf_budget_amount: number | null
+          fee_structure: string | null
+          project_name: string | null
+          project_number: number | null
+          subtask_description: string | null
+          subtask_number: number | null
+          task_description: string | null
+          task_number: number | null
+          task_unit: string | null
+          wbs_code: string | null
+        }
+        Insert: {
+          budget_amount?: never
+          contract?: string | null
+          dmf_budget_amount?: never
+          fee_structure?: string | null
+          project_name?: string | null
+          project_number?: number | null
+          subtask_description?: string | null
+          subtask_number?: number | null
+          task_description?: string | null
+          task_number?: number | null
+          task_unit?: string | null
+          wbs_code?: string | null
+        }
+        Update: {
+          budget_amount?: never
+          contract?: string | null
+          dmf_budget_amount?: never
+          fee_structure?: string | null
+          project_name?: string | null
+          project_number?: number | null
+          subtask_description?: string | null
+          subtask_number?: number | null
+          task_description?: string | null
+          task_number?: number | null
+          task_unit?: string | null
+          wbs_code?: string | null
+        }
+        Relationships: []
+      }
+      project_hierarchy: {
+        Row: {
+          contract: string | null
+          project_name: string | null
+          project_number: number | null
+        }
+        Relationships: []
+      }
+      task_hierarchy: {
+        Row: {
+          project_number: number | null
+          task_description: string | null
+          task_number: number | null
+          task_unit: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
