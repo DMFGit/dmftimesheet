@@ -39,7 +39,7 @@ export default function AdminReview() {
         .from('Time_Entries')
         .select(`
           *,
-          Employees!inner(name)
+          Employees!Time_Entries_employee_id_fkey(name)
         `)
         .eq('status', 'submitted')
         .order('submitted_at', { ascending: false });
