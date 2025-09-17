@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
+import DMFLogo from "@/assets/DMF_Logo-02.svg";
 
 export function Header() {
   const { user, employee, signOut } = useAuth();
@@ -15,17 +16,13 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <Clock className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <Link to="/" className="block">
-                <h1 className="text-xl font-bold text-white hover:text-primary-light/90 transition-colors">
-                  DMF Timesheet
-                </h1>
-                <p className="text-primary-light/80 text-sm">Civil Engineering Time Tracking</p>
-              </Link>
-            </div>
+            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
+              <img 
+                src={DMFLogo} 
+                alt="DMF Engineering" 
+                className="h-10 w-auto"
+              />
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
