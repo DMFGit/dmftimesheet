@@ -421,6 +421,23 @@ export type Database = {
           wbs_code: string | null
         }[]
       }
+      get_budget_items_secure: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          budget_amount: number | null
+          contract: string | null
+          dmf_budget_amount: number | null
+          fee_structure: string | null
+          project_name: string | null
+          project_number: number | null
+          subtask_description: string | null
+          subtask_number: number | null
+          task_description: string | null
+          task_number: number | null
+          task_unit: string | null
+          wbs_code: string | null
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
