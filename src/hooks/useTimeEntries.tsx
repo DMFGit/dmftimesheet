@@ -214,14 +214,16 @@ export const useTimeEntries = () => {
   };
 
   const getSubtaskById = (id: string) => {
-    const budgetItem = budgetItems.find(item => item.subtask_number.toString() === id);
+    const budgetItem = budgetItems.find(item => 
+      item.subtask_number != null && item.subtask_number.toString() === id
+    );
     return budgetItem ? {
-      id: budgetItem.subtask_number.toString(),
-      number: budgetItem.subtask_number.toString(),
-      description: budgetItem.subtask_description,
-      wbs_code: budgetItem.wbs_code,
-      budget: budgetItem.budget_amount,
-      fee_structure: budgetItem.fee_structure,
+      id: budgetItem.subtask_number!.toString(),
+      number: budgetItem.subtask_number!.toString(),
+      description: budgetItem.subtask_description || '',
+      wbs_code: budgetItem.wbs_code || '',
+      budget: budgetItem.budget_amount || 0,
+      fee_structure: budgetItem.fee_structure || '',
     } : null;
   };
 
@@ -246,15 +248,15 @@ export const useTimeEntries = () => {
     getSubtasksByTask: (taskId: string) => {
       const taskNumber = parseInt(taskId);
       return budgetItems
-        .filter(item => item.task_number === taskNumber)
+        .filter(item => item.task_number === taskNumber && item.subtask_number != null)
         .map(item => ({
-          id: item.subtask_number.toString(),
+          id: item.subtask_number!.toString(),
           task_id: taskNumber.toString(),
-          number: item.subtask_number.toString(),
-          description: item.subtask_description,
-          wbs_code: item.wbs_code,
-          budget: item.budget_amount,
-          fee_structure: item.fee_structure,
+          number: item.subtask_number!.toString(),
+          description: item.subtask_description || '',
+          wbs_code: item.wbs_code || '',
+          budget: item.budget_amount || 0,
+          fee_structure: item.fee_structure || '',
         }));
     },
     refreshData: fetchTimeEntries,
