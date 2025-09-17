@@ -16,12 +16,13 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
-            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
+            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity space-x-3">
               <img 
                 src={DMFLogo} 
                 alt="DMF Engineering" 
                 className="h-10 w-auto filter brightness-0"
               />
+              <h1 className="text-2xl font-bold text-foreground">Timesheet</h1>
             </Link>
           </div>
 
