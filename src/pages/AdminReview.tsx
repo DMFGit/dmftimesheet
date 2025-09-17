@@ -81,6 +81,9 @@ export default function AdminReview() {
 
   const handleReview = async (entryId: string, status: 'approved' | 'rejected') => {
     try {
+      const entry = timeEntries.find(e => e.id === entryId);
+      if (!entry) return;
+
       const updateData: any = {
         status,
         reviewed_at: new Date().toISOString(),
@@ -98,9 +101,32 @@ export default function AdminReview() {
 
       if (error) throw error;
 
+      // Send notification via edge function
+      const notificationType = status === 'approved' ? 'time_entry_approved' : 'time_entry_rejected';
+      
+      try {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: notificationType,
+            employeeId: entry.employee_id,
+            entryDetails: {
+              date: entry.entry_date,
+              hours: entry.hours,
+              projectName: entry.project_name,
+              taskDescription: entry.task_description,
+              wbsCode: entry.wbs_code,
+            },
+            reviewNotes: reviewNotes[entryId] || null,
+          },
+        });
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        // Don't fail the main operation if notification fails
+      }
+
       toast({
         title: "Success",
-        description: `Time entry ${status} successfully`,
+        description: `Time entry ${status} successfully and notification sent`,
       });
 
       // Remove from list

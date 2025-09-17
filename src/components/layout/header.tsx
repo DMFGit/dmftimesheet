@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import DMFLogo from "@/assets/DMF_Logo-02.svg";
 
 export function Header() {
@@ -44,6 +45,7 @@ export function Header() {
             {/* User Info */}
             {employee && (
               <div className="flex items-center space-x-3">
+                <NotificationDropdown />
                 <div className="text-right">
                   <p className="text-foreground font-medium">{employee.name}</p>
                   <div className="flex items-center gap-2">
