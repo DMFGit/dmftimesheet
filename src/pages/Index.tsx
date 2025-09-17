@@ -50,8 +50,9 @@ interface QuickEntryForm {
 }
 
 const Index = () => {
+  // ALL HOOKS MUST BE AT THE TOP - BEFORE ANY CONDITIONAL RETURNS
   const [currentWeekStart, setCurrentWeekStart] = useState(() => 
-    startOfWeek(new Date(), { weekStartsOn: 0 }) // Start on Sunday
+    startOfWeek(new Date(), { weekStartsOn: 0 })
   );
   
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
@@ -77,21 +78,11 @@ const Index = () => {
   } = useTimeEntries();
   const { toast } = useToast();
 
-  // Show auth form if not authenticated
-  if (authLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (!user || !employee) {
-    return <AuthForm />;
-  }
-
-  // Generate the week days (Sunday through Saturday)
+  // ALL useMemo hooks MUST be here - before any conditional returns
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
   }, [currentWeekStart]);
 
-  // Filter time entries for the current week
   const weekTimeEntries = useMemo(() => {
     const weekStart = currentWeekStart;
     const weekEnd = addDays(weekStart, 6);
@@ -102,12 +93,10 @@ const Index = () => {
     });
   }, [timeEntries, currentWeekStart]);
 
-  // Group entries by project and day
   const weeklyData = useMemo(() => {
     const data: WeeklyData = {};
     
     weekTimeEntries.forEach(entry => {
-      // Find budget item to get project name
       const budgetItem = budgetItems.find(item => item.wbs_code === entry.wbs_code);
       const projectName = budgetItem?.project_name || entry.wbs_code;
       const projectKey = `${entry.wbs_code}`;
@@ -136,7 +125,6 @@ const Index = () => {
     return data;
   }, [weekTimeEntries, budgetItems]);
 
-  // Calculate daily totals
   const dailyTotals = useMemo(() => {
     const totals: { [dayKey: string]: number } = {};
     
@@ -154,23 +142,9 @@ const Index = () => {
     return totals;
   }, [weekDays, weeklyData]);
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      setCurrentWeekStart(subWeeks(currentWeekStart, 1));
-    } else {
-      setCurrentWeekStart(addWeeks(currentWeekStart, 1));
-    }
-  };
-
-  const goToCurrentWeek = () => {
-    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
-  };
-
-  // Get recent entries (last 8 unique subtasks)
   const recentEntries = useMemo(() => {
     const uniqueEntries = new Map<string, RecentEntry>();
     
-    // Sort time entries by creation date (most recent first)
     const sortedEntries = [...timeEntries].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
@@ -183,7 +157,6 @@ const Index = () => {
 
       const key = entry.wbs_code;
       if (!uniqueEntries.has(key)) {
-        // Find the subtask info
         const projectId = budgetItem.project_number?.toString() || '';
         const taskId = budgetItem.task_number?.toString() || '';
         const subtaskId = budgetItem.subtask_number?.toString() || '';
@@ -203,6 +176,28 @@ const Index = () => {
 
     return Array.from(uniqueEntries.values());
   }, [timeEntries, budgetItems]);
+
+  // NOW conditional returns can happen AFTER all hooks
+  if (authLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user || !employee) {
+    return <AuthForm />;
+  }
+
+  // Helper functions
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      setCurrentWeekStart(subWeeks(currentWeekStart, 1));
+    } else {
+      setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+    }
+  };
+
+  const goToCurrentWeek = () => {
+    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
+  };
 
   const openQuickEntry = (date: string) => {
     setQuickEntryForm({
@@ -231,7 +226,6 @@ const Index = () => {
     setQuickEntryForm(prev => {
       const updated = { ...prev, [field]: value };
       
-      // Reset dependent fields when parent changes
       if (field === 'projectId') {
         updated.taskId = '';
         updated.subtaskId = '';
@@ -253,7 +247,6 @@ const Index = () => {
       return;
     }
 
-    // Find the WBS code for the selected subtask
     const subtaskNumber = quickEntryForm.subtaskId ? parseFloat(quickEntryForm.subtaskId) : 0;
     const budgetItem = budgetItems.find(item => 
       item.project_number === parseInt(quickEntryForm.projectId) &&
