@@ -123,9 +123,9 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.project_number} value={project.project_number.toString()}>
-                        {project.project_number} - {project.project_name}
+                    {projects.map((project, index) => (
+                      <SelectItem key={`${project.project_number}-${project.contract}-${index}`} value={project.project_number.toString()}>
+                        {project.project_number} - {project.project_name} ({project.contract})
                       </SelectItem>
                     ))}
                   </SelectContent>
