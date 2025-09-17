@@ -55,10 +55,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchEmployee(session.user.id);
+        // Use setTimeout to defer async operations
+        setTimeout(() => {
+          fetchEmployee(session.user.id);
+        }, 0);
       } else {
         setEmployee(null);
       }
@@ -70,20 +73,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchEmployee = async (userId: string) => {
     try {
-      console.log('Fetching employee for userId:', userId);
       const { data, error } = await supabase
         .from('Employees')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
-
-      console.log('Employee fetch result:', { data, error });
       
       if (data && !error) {
         setEmployee(data);
-        console.log('Employee set:', data);
       } else if (!data) {
-        console.log('No employee record found for user');
         setEmployee(null);
       }
     } catch (err) {
