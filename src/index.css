@@ -28,6 +28,10 @@
     --muted: 210 15% 96%;
     --muted-foreground: 210 10% 55%;
 
+    /* Popover/dropdown backgrounds */
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 15%;
+
     /* Success state for approved timesheets */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
