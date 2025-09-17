@@ -59,11 +59,9 @@ export const useTimeEntries = () => {
   };
 
   const fetchBudgetData = async () => {
-    // Fetch budget items from the view
+    // Fetch budget items using secure function
     const { data: budgetData, error: budgetError } = await supabase
-      .from('budget_items')
-      .select('*')
-      .order('project_number, task_number, subtask_number');
+      .rpc('get_budget_items');
 
     if (budgetError) {
       console.error('Error fetching budget items:', budgetError);
@@ -72,10 +70,9 @@ export const useTimeEntries = () => {
 
     setBudgetItems(budgetData || []);
 
-    // Fetch project hierarchy
+    // Fetch project hierarchy using secure function
     const { data: projectData, error: projectError } = await supabase
-      .from('project_hierarchy')
-      .select('*');
+      .rpc('get_project_hierarchy');
 
     if (projectError) {
       console.error('Error fetching projects:', projectError);
@@ -84,10 +81,9 @@ export const useTimeEntries = () => {
 
     setProjects(projectData || []);
 
-    // Fetch task hierarchy
+    // Fetch task hierarchy using secure function
     const { data: taskData, error: taskError } = await supabase
-      .from('task_hierarchy')  
-      .select('*');
+      .rpc('get_task_hierarchy');
 
     if (taskError) {
       console.error('Error fetching tasks:', taskError);
