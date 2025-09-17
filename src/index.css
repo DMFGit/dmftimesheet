@@ -2,63 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Civil Engineering Timesheet Platform Design System */
+/* DMF Engineering Brand Color System */
 
 @layer base {
   :root {
-    /* Clean, professional background scheme */
-    --background: 0 0% 99%;
-    --foreground: 210 15% 15%;
+    /* Brand background scheme - using cream white */
+    --background: 60 60% 97%;
+    --foreground: 0 0% 11%;
 
-    /* Card system for timesheet entries */
-    --card: 0 0% 100%;
-    --card-foreground: 210 15% 15%;
+    /* Card system using brand colors */
+    --card: 60 60% 97%;
+    --card-foreground: 0 0% 11%;
 
-    /* Professional engineering blue theme */
-    --primary: 211 70% 45%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 211 70% 40%;
-    --primary-light: 211 70% 95%;
+    /* Primary brand green */
+    --primary: 85 45% 74%;
+    --primary-foreground: 0 0% 11%;
+    --primary-hover: 85 50% 70%;
+    --primary-light: 85 45% 94%;
 
-    /* Secondary accent for approval states */
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 210 15% 25%;
+    /* Brand accent yellow */
+    --secondary: 63 97% 68%;
+    --secondary-foreground: 0 0% 11%;
 
-    /* Muted elements */
-    --muted: 210 15% 96%;
-    --muted-foreground: 210 10% 55%;
+    /* Muted elements using light brand gray */
+    --muted: 0 17% 92%;
+    --muted-foreground: 0 0% 45%;
 
     /* Popover/dropdown backgrounds */
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 15% 15%;
+    --popover: 60 60% 97%;
+    --popover-foreground: 0 0% 11%;
 
-    /* Success state for approved timesheets */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --success-light: 142 76% 95%;
+    /* Success state using brand green */
+    --success: 85 45% 74%;
+    --success-foreground: 0 0% 11%;
+    --success-light: 85 45% 94%;
 
-    /* Warning state for pending review */
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --warning-light: 38 92% 95%;
+    /* Warning state using brand yellow */
+    --warning: 63 97% 68%;
+    --warning-foreground: 0 0% 11%;
+    --warning-light: 63 97% 94%;
 
-    /* Destructive state for rejected entries */
+    /* Destructive state */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 60 60% 97%;
 
     /* Input and border system */
-    --border: 210 20% 90%;
-    --input: 210 20% 98%;
-    --ring: 211 70% 45%;
+    --border: 0 17% 85%;
+    --input: 60 60% 95%;
+    --ring: 85 45% 74%;
 
-    /* Professional gradient for headers */
-    --gradient-primary: linear-gradient(135deg, hsl(211 70% 45%), hsl(211 60% 55%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 99%), hsl(210 15% 97%));
+    /* Brand gradient using green and yellow */
+    --gradient-primary: linear-gradient(135deg, hsl(85 45% 74%), hsl(63 97% 68%));
+    --gradient-subtle: linear-gradient(180deg, hsl(60 60% 97%), hsl(0 17% 92%));
 
-    /* Shadows for depth */
-    --shadow-sm: 0 1px 2px 0 hsl(210 15% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(210 15% 15% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(210 15% 15% / 0.1);
+    /* Shadows using brand dark color */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 11% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 11% / 0.1);
 
     /* Transitions */
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

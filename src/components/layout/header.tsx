@@ -20,7 +20,7 @@ export function Header() {
               <img 
                 src={DMFLogo} 
                 alt="DMF Engineering" 
-                className="h-10 w-auto"
+                className="h-10 w-auto filter brightness-0"
               />
             </Link>
           </div>
@@ -32,7 +32,7 @@ export function Header() {
                 <Button 
                   variant={location.pathname === '/admin/review' ? 'secondary' : 'ghost'}
                   size="sm"
-                  className="text-white hover:bg-white/20 border-white/20"
+                  className="text-foreground hover:bg-primary/20"
                 >
                   <FileCheck className="h-4 w-4 mr-2" />
                   Review
@@ -44,11 +44,11 @@ export function Header() {
             {employee && (
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-white font-medium">{employee.name}</p>
+                  <p className="text-foreground font-medium">{employee.name}</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-primary-light/80 text-sm capitalize">{employee.role}</p>
+                    <p className="text-muted-foreground text-sm capitalize">{employee.role}</p>
                     {isAdmin && (
-                      <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                      <Badge variant="secondary" className="text-xs">
                         <Shield className="h-3 w-3 mr-1" />
                         Admin
                       </Badge>
@@ -59,7 +59,7 @@ export function Header() {
                   variant="outline"
                   size="sm"
                   onClick={() => signOut()}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="border-primary/30 text-foreground hover:bg-primary/20"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
