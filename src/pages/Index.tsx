@@ -34,10 +34,6 @@ const Index = () => {
   }
 
   if (!user || !employee) {
-    // If Supabase is not configured, show demo mode
-    if (!import.meta.env.VITE_SUPABASE_URL) {
-      return <DemoMode selectedDate={selectedDate} setSelectedDate={setSelectedDate} />;
-    }
     return <AuthForm />;
   }
 
