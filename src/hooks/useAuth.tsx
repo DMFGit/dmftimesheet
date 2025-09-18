@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchEmployee(session.user.id);
+        await fetchOrCreateEmployee(session.user);
       }
       
       setLoading(false);
@@ -59,12 +59,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         // Use setTimeout to defer async operations
-        setTimeout(() => {
-          fetchEmployee(session.user.id);
+        setTimeout(async () => {
+          await fetchOrCreateEmployee(session.user);
         }, 0);
       } else {
         setEmployee(null);
@@ -75,21 +75,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchEmployee = async (userId: string) => {
+  const fetchOrCreateEmployee = async (user: User) => {
     try {
+      // First try to fetch existing employee
       const { data, error } = await supabase
         .from('Employees')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .maybeSingle();
       
       if (data && !error) {
         setEmployee(data);
-      } else if (!data) {
+        return;
+      }
+      
+      // If no employee exists, create one for OAuth users
+      if (!data && user.email) {
+        const { data: newEmployee, error: insertError } = await supabase
+          .from('Employees')
+          .insert({
+            user_id: user.id,
+            name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0],
+            email: user.email,
+            role: 'employee', // Default role
+            active: true,
+            'Default Billing Rate': 0
+          })
+          .select()
+          .single();
+        
+        if (newEmployee && !insertError) {
+          setEmployee(newEmployee);
+        } else {
+          console.error('Error creating employee:', insertError);
+          setEmployee(null);
+        }
+      } else {
         setEmployee(null);
       }
     } catch (err) {
-      console.error('Error fetching employee:', err);
+      console.error('Error fetching/creating employee:', err);
       setEmployee(null);
     }
   };
