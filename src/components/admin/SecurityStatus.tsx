@@ -40,6 +40,18 @@ export const SecurityStatus = () => {
       icon: <Shield className="h-4 w-4" />,
     },
     {
+      name: "Data Protection",
+      status: "implemented",
+      description: "Sensitive financial data secured with admin-only access controls",
+      icon: <Shield className="h-4 w-4" />,
+    },
+    {
+      name: "Secure API Access", 
+      status: "implemented",
+      description: "All data access routed through security definer functions",
+      icon: <Lock className="h-4 w-4" />,
+    },
+    {
       name: "Leaked Password Protection",
       status: "warning",
       description: "Enable in Supabase Auth settings for additional password security",
