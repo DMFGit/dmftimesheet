@@ -351,13 +351,6 @@ export type Database = {
             foreignKeyName: "fk_time_entries_wbs_code"
             columns: ["wbs_code"]
             isOneToOne: false
-            referencedRelation: "budget_items"
-            referencedColumns: ["wbs_code"]
-          },
-          {
-            foreignKeyName: "fk_time_entries_wbs_code"
-            columns: ["wbs_code"]
-            isOneToOne: false
             referencedRelation: "Project_Budgets"
             referencedColumns: ["WBS Code"]
           },
@@ -379,127 +372,83 @@ export type Database = {
       }
     }
     Views: {
-      budget_items: {
-        Row: {
-          budget_amount: number | null
-          contract: string | null
-          dmf_budget_amount: number | null
-          fee_structure: string | null
-          project_name: string | null
-          project_number: number | null
-          subtask_description: string | null
-          subtask_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
-          wbs_code: string | null
-        }
-        Insert: {
-          budget_amount?: never
-          contract?: string | null
-          dmf_budget_amount?: never
-          fee_structure?: string | null
-          project_name?: string | null
-          project_number?: number | null
-          subtask_description?: string | null
-          subtask_number?: number | null
-          task_description?: string | null
-          task_number?: number | null
-          task_unit?: string | null
-          wbs_code?: string | null
-        }
-        Update: {
-          budget_amount?: never
-          contract?: string | null
-          dmf_budget_amount?: never
-          fee_structure?: string | null
-          project_name?: string | null
-          project_number?: number | null
-          subtask_description?: string | null
-          subtask_number?: number | null
-          task_description?: string | null
-          task_number?: number | null
-          task_unit?: string | null
-          wbs_code?: string | null
-        }
-        Relationships: []
-      }
-      project_hierarchy: {
-        Row: {
-          contract: string | null
-          project_name: string | null
-          project_number: number | null
-        }
-        Relationships: []
-      }
-      task_hierarchy: {
-        Row: {
-          project_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_employee_for_oauth_user: {
         Args: { p_email: string; p_name: string; p_user_id: string }
         Returns: string
       }
+      get_budget_data_admin_only: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          budget_amount: number
+          contract: string
+          dmf_budget_amount: number
+          fee_structure: string
+          project_name: string
+          project_number: number
+          subtask_description: string
+          subtask_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
+          wbs_code: string
+        }[]
+      }
       get_budget_items: {
         Args: Record<PropertyKey, never>
         Returns: {
-          budget_amount: number | null
-          contract: string | null
-          dmf_budget_amount: number | null
-          fee_structure: string | null
-          project_name: string | null
-          project_number: number | null
-          subtask_description: string | null
-          subtask_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
-          wbs_code: string | null
+          budget_amount: number
+          contract: string
+          dmf_budget_amount: number
+          fee_structure: string
+          project_name: string
+          project_number: number
+          subtask_description: string
+          subtask_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
+          wbs_code: string
         }[]
       }
       get_budget_items_secure: {
         Args: Record<PropertyKey, never>
         Returns: {
-          budget_amount: number | null
-          contract: string | null
-          dmf_budget_amount: number | null
-          fee_structure: string | null
-          project_name: string | null
-          project_number: number | null
-          subtask_description: string | null
-          subtask_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
-          wbs_code: string | null
+          budget_amount: number
+          contract: string
+          dmf_budget_amount: number
+          fee_structure: string
+          project_name: string
+          project_number: number
+          subtask_description: string
+          subtask_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
+          wbs_code: string
         }[]
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_project_hierarchy_secure: {
+      get_project_data_admin_only: {
         Args: Record<PropertyKey, never>
         Returns: {
-          contract: string | null
-          project_name: string | null
-          project_number: number | null
+          contract: string
+          project_name: string
+          project_number: number
         }[]
       }
-      get_task_hierarchy_secure: {
+      get_task_data_admin_only: {
         Args: Record<PropertyKey, never>
         Returns: {
-          project_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
+          project_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
         }[]
       }
       is_admin: {
