@@ -33,6 +33,8 @@ export const AuthForm = () => {
         },
       });
 
+      console.log('OAuth complete - data:', data, 'error:', error);
+
       if (error) {
         console.error('Microsoft OAuth error:', error);
         toast({
@@ -42,10 +44,30 @@ export const AuthForm = () => {
         });
         setLoading(false);
       } else if (data?.url) {
-        console.log('Redirecting to Microsoft login:', data.url);
-        // Force redirect to Microsoft login page
-        window.location.href = data.url;
-        // Don't set loading to false here since we're redirecting
+        console.log('About to redirect to:', data.url);
+        
+        // Try multiple redirect methods
+        try {
+          console.log('Attempting window.location.href redirect...');
+          window.location.href = data.url;
+          console.log('window.location.href executed');
+        } catch (redirectError) {
+          console.error('window.location.href failed:', redirectError);
+          
+          // Fallback: try window.open
+          console.log('Trying window.open fallback...');
+          const popup = window.open(data.url, '_self');
+          if (!popup) {
+            console.error('window.open was blocked');
+            toast({
+              title: "Popup Blocked",
+              description: "Please allow popups and try again, or manually visit: " + data.url,
+              variant: "destructive",
+            });
+          }
+        }
+        
+        // Don't set loading to false since we're redirecting
       } else {
         console.error('No redirect URL returned from OAuth');
         toast({
