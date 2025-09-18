@@ -17,6 +17,7 @@ interface AuthContextType {
   user: User | null;
   employee: Employee | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
@@ -36,6 +37,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Use role-based admin check instead of hardcoded email
+  const isAdmin = employee?.role === 'admin';
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -147,6 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     employee,
     loading,
+    isAdmin,
     signIn,
     signUp,
     signOut,

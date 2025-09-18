@@ -21,7 +21,7 @@ interface TimeEntryWithEmployee extends TimeEntry {
 }
 
 export default function AdminReview() {
-  const { user, employee } = useAuth();
+  const { user, employee, isAdmin } = useAuth();
   const [timeEntries, setTimeEntries] = useState<TimeEntryWithEmployee[]>([]);
   const [draftEntries, setDraftEntries] = useState<TimeEntryWithEmployee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +35,6 @@ export default function AdminReview() {
     draftHours: 0
   });
   const { toast } = useToast();
-
-  // Check admin access
-  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
 
   useEffect(() => {
     if (isAdmin) {

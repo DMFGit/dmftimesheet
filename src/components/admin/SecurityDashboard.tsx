@@ -3,10 +3,7 @@ import { SecurityAuditLog } from './SecurityAuditLog';
 import { useAuth } from '@/hooks/useAuth';
 
 export const SecurityDashboard = () => {
-  const { user, employee } = useAuth();
-  
-  // Only show to admin users
-  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
+  const { isAdmin } = useAuth();
 
   if (!isAdmin) {
     return null;

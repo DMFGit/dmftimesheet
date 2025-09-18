@@ -7,10 +7,8 @@ import { NotificationDropdown } from "@/components/notifications/NotificationDro
 import DMFLogo from "@/assets/DMF_Logo-02.svg";
 
 export function Header() {
-  const { user, employee, signOut } = useAuth();
+  const { user, employee, signOut, isAdmin } = useAuth();
   const location = useLocation();
-  
-  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
 
   return (
     <header className="bg-primary shadow-md border-b border-border">
