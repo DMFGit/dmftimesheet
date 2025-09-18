@@ -152,22 +152,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error: error.message };
     }
 
-    if (data.user) {
-      // Create employee record
-      const { error: employeeError } = await (supabase as any)
-        .from('Employees')
-        .insert({
-          user_id: data.user.id,
-          name,
-          email,
-          role: 'employee', // Default role
-        });
-
-      if (employeeError) {
-        return { error: employeeError.message };
-      }
-    }
-
+    // Employee record will be created automatically via the fetchOrCreateEmployee function
+    // when the auth state changes, using the secure create_employee_for_oauth_user function
     return {};
   };
 
