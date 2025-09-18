@@ -519,6 +519,10 @@ export type Database = {
           task_unit: string | null
         }[]
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       log_sensitive_access: {
         Args: { action: string; table_name: string }
         Returns: undefined

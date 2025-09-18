@@ -38,8 +38,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Use role-based admin check instead of hardcoded email
-  const isAdmin = employee?.role === 'admin';
+  // Use role-based admin check that matches database security function
+  const isAdmin = employee?.role === 'admin' && employee?.active;
 
   useEffect(() => {
     const initializeAuth = async () => {

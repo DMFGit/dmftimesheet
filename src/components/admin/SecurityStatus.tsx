@@ -16,16 +16,28 @@ export const SecurityStatus = () => {
 
   const securityFeatures = [
     {
-      name: "Role-Based Access Control",
+      name: "Centralized Access Control",
       status: "implemented",
-      description: "Users cannot modify their own roles or sensitive fields",
-      icon: <Users className="h-4 w-4" />,
+      description: "Role-based access control using centralized is_admin() function",
+      icon: <Shield className="h-4 w-4" />,
+    },
+    {
+      name: "Financial Data Protection", 
+      status: "implemented",
+      description: "Budget and project data secured with admin-only secure wrapper functions",
+      icon: <Lock className="h-4 w-4" />,
     },
     {
       name: "Security Audit Logging",
       status: "implemented", 
-      description: "All role and status changes are logged for security monitoring",
+      description: "All sensitive operations logged with detailed audit trails",
       icon: <Eye className="h-4 w-4" />,
+    },
+    {
+      name: "Role Escalation Prevention",
+      status: "implemented",
+      description: "Database triggers prevent unauthorized role and privilege changes",
+      icon: <Users className="h-4 w-4" />,
     },
     {
       name: "Enhanced Authentication",
@@ -34,21 +46,15 @@ export const SecurityStatus = () => {
       icon: <Lock className="h-4 w-4" />,
     },
     {
-      name: "Database Security",
+      name: "Row Level Security",
       status: "implemented",
-      description: "Row Level Security policies prevent unauthorized data access",
+      description: "Comprehensive RLS policies protect all sensitive data tables",
       icon: <Shield className="h-4 w-4" />,
     },
     {
-      name: "Data Protection",
+      name: "Secure Function Wrappers", 
       status: "implemented",
-      description: "Sensitive financial data secured with admin-only access controls",
-      icon: <Shield className="h-4 w-4" />,
-    },
-    {
-      name: "Secure API Access", 
-      status: "implemented",
-      description: "All data access routed through security definer functions",
+      description: "Financial views protected by security definer functions",
       icon: <Lock className="h-4 w-4" />,
     },
     {
