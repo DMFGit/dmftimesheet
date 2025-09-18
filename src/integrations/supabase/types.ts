@@ -485,29 +485,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_project_hierarchy: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          contract: string | null
-          project_name: string | null
-          project_number: number | null
-        }[]
-      }
       get_project_hierarchy_secure: {
         Args: Record<PropertyKey, never>
         Returns: {
           contract: string | null
           project_name: string | null
           project_number: number | null
-        }[]
-      }
-      get_task_hierarchy: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          project_number: number | null
-          task_description: string | null
-          task_number: number | null
-          task_unit: string | null
         }[]
       }
       get_task_hierarchy_secure: {
