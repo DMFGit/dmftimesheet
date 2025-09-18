@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { parseDateSafe } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { TimeEntry } from "@/types/timesheet";
 
 interface WeeklyData {
   [projectKey: string]: {
@@ -59,6 +60,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
   const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [quickEntryForm, setQuickEntryForm] = useState<QuickEntryForm>({
     selectedDate: '',
     entryMode: 'manual',
@@ -77,6 +79,8 @@ const Index = () => {
     getSubtasksByTask, 
     getUniqueProjects,
     addTimeEntry,
+    updateTimeEntry,
+    deleteTimeEntry,
     loading: timeEntriesLoading 
   } = useTimeEntries();
   const { toast } = useToast();
@@ -219,6 +223,7 @@ const Index = () => {
   };
 
   const openQuickEntry = (date: string) => {
+    setEditingEntry(null);
     setQuickEntryForm({
       selectedDate: date,
       entryMode: 'manual',
@@ -229,6 +234,32 @@ const Index = () => {
       description: ''
     });
     setQuickEntryOpen(true);
+  };
+
+  const openEditEntry = (entry: TimeEntry) => {
+    const budgetItem = budgetItems.find(item => item.wbs_code === entry.wbs_code);
+    
+    setEditingEntry(entry);
+    setQuickEntryForm({
+      selectedDate: entry.entry_date,
+      entryMode: 'manual',
+      projectId: budgetItem?.project_number?.toString() || '',
+      taskId: budgetItem?.task_number?.toString() || '',
+      subtaskId: budgetItem?.subtask_number?.toString() || '',
+      hours: Number(entry.hours),
+      description: entry.description || ''
+    });
+    setQuickEntryOpen(true);
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    if (window.confirm('Are you sure you want to delete this time entry?')) {
+      await deleteTimeEntry(entryId);
+      toast({
+        title: "Success",
+        description: "Time entry deleted successfully",
+      });
+    }
   };
 
   const loadRecentEntry = (recentEntry: RecentEntry) => {
@@ -282,14 +313,31 @@ const Index = () => {
       return;
     }
 
-    await addTimeEntry({
+    const entryData = {
       wbs_code: budgetItem.wbs_code,
       entry_date: quickEntryForm.selectedDate,
       hours: quickEntryForm.hours,
       description: quickEntryForm.description,
-    });
+    };
+
+    if (editingEntry) {
+      // Update existing entry
+      await updateTimeEntry(editingEntry.id, entryData);
+      toast({
+        title: "Success",
+        description: "Time entry updated successfully",
+      });
+    } else {
+      // Add new entry
+      await addTimeEntry(entryData);
+      toast({
+        title: "Success",
+        description: "Time entry added successfully",
+      });
+    }
 
     setQuickEntryOpen(false);
+    setEditingEntry(null);
     setQuickEntryForm({
       selectedDate: '',
       entryMode: 'manual',
@@ -596,28 +644,53 @@ const Index = () => {
                             return (
                               <td key={index} className="p-3 border-b border-border text-center">
                                 {hours > 0 ? (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge
-                                        variant={hours >= 8 ? "default" : "secondary"}
-                                        className="cursor-help"
+                                  <div className="flex flex-col items-center gap-1">
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Badge
+                                          variant={hours >= 8 ? "default" : "secondary"}
+                                          className="cursor-help"
+                                        >
+                                          {hours}h
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-xs">
+                                        <div className="space-y-1">
+                                          <div className="font-semibold">{hours} hours</div>
+                                          {descriptions.length > 0 && (
+                                            <div className="text-sm">
+                                              {descriptions.map((desc, i) => (
+                                                <div key={i}>• {desc}</div>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    
+                                    {/* Show edit button for draft entries */}
+                                    {weekTimeEntries.some(entry => 
+                                      entry.entry_date === dayKey && 
+                                      entry.wbs_code === projectKey && 
+                                      entry.status === 'draft'
+                                    ) && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-6 h-6 p-0 text-muted-foreground hover:text-primary"
+                                        onClick={() => {
+                                          const draftEntry = weekTimeEntries.find(entry => 
+                                            entry.entry_date === dayKey && 
+                                            entry.wbs_code === projectKey && 
+                                            entry.status === 'draft'
+                                          );
+                                          if (draftEntry) openEditEntry(draftEntry);
+                                        }}
                                       >
-                                        {hours}h
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-xs">
-                                      <div className="space-y-1">
-                                        <div className="font-semibold">{hours} hours</div>
-                                        {descriptions.length > 0 && (
-                                          <div className="text-sm">
-                                            {descriptions.map((desc, i) => (
-                                              <div key={i}>• {desc}</div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
+                                        <Edit className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </div>
                                 ) : (
                                   <Button
                                     variant="ghost"
@@ -764,6 +837,28 @@ const Index = () => {
                             >
                               {entry.status}
                             </Badge>
+                            
+                            {/* Edit and Delete buttons for draft entries */}
+                            {entry.status === 'draft' && (
+                              <div className="flex items-center gap-1 ml-auto">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-8 h-8 p-0 text-muted-foreground hover:text-primary"
+                                  onClick={() => openEditEntry(entry)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-8 h-8 p-0 text-muted-foreground hover:text-destructive"
+                                  onClick={() => handleDeleteEntry(entry.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
                           
                           <h3 className="font-semibold text-lg mb-1">{entry.projectName}</h3>
@@ -847,7 +942,7 @@ const Index = () => {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                Add Time Entry - {quickEntryForm.selectedDate ? format(parseDateSafe(quickEntryForm.selectedDate), 'MMM d, yyyy') : ''}
+                {editingEntry ? 'Edit Time Entry' : 'Add Time Entry'} - {quickEntryForm.selectedDate ? format(parseDateSafe(quickEntryForm.selectedDate), 'MMM d, yyyy') : ''}
               </DialogTitle>
             </DialogHeader>
             
@@ -1063,7 +1158,7 @@ const Index = () => {
                   onClick={handleQuickSubmit}
                   disabled={!quickEntryForm.projectId || !quickEntryForm.taskId || quickEntryForm.hours === 0}
                 >
-                  Add Time Entry
+                  {editingEntry ? 'Update Entry' : 'Add Time Entry'}
                 </Button>
               </div>
             </div>

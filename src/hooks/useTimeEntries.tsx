@@ -128,6 +128,63 @@ export const useTimeEntries = () => {
     setLoading(false);
   };
 
+  const updateTimeEntry = async (entryId: string, entryData: {
+    wbs_code: string;
+    entry_date: string;
+    hours: number;
+    description?: string;
+  }) => {
+    if (!employee) return;
+
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('Time_Entries')
+      .update(entryData)
+      .eq('id', entryId)
+      .eq('employee_id', employee.id)
+      .eq('status', 'draft') // Only allow updating draft entries
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update time entry",
+        variant: "destructive",
+      });
+    } else {
+      setTimeEntries(prev => prev.map(entry => 
+        entry.id === entryId ? data as TimeEntry : entry
+      ));
+    }
+
+    setLoading(false);
+  };
+
+  const deleteTimeEntry = async (entryId: string) => {
+    if (!employee) return;
+
+    setLoading(true);
+    const { error } = await supabase
+      .from('Time_Entries')
+      .delete()
+      .eq('id', entryId)
+      .eq('employee_id', employee.id)
+      .eq('status', 'draft'); // Only allow deleting draft entries
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete time entry",
+        variant: "destructive",
+      });
+    } else {
+      setTimeEntries(prev => prev.filter(entry => entry.id !== entryId));
+    }
+
+    setLoading(false);
+  };
+
   const submitTimesheet = async (date: string) => {
     if (!employee) return;
 
@@ -230,6 +287,8 @@ export const useTimeEntries = () => {
     tasks,
     loading,
     addTimeEntry,
+    updateTimeEntry,
+    deleteTimeEntry,
     submitTimesheet,
     getBudgetItemByWbsCode,
     getProjectByNumber,
