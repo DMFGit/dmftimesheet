@@ -668,23 +668,23 @@ const Index = () => {
                                       </TooltipContent>
                                     </Tooltip>
                                     
-                                    {/* Show edit button for draft entries */}
+                                    {/* Show edit button for draft and rejected entries */}
                                     {weekTimeEntries.some(entry => 
                                       entry.entry_date === dayKey && 
                                       entry.wbs_code === projectKey && 
-                                      entry.status === 'draft'
+                                      (entry.status === 'draft' || entry.status === 'rejected')
                                     ) && (
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         className="w-6 h-6 p-0 text-muted-foreground hover:text-primary"
                                         onClick={() => {
-                                          const draftEntry = weekTimeEntries.find(entry => 
+                                          const editableEntry = weekTimeEntries.find(entry => 
                                             entry.entry_date === dayKey && 
                                             entry.wbs_code === projectKey && 
-                                            entry.status === 'draft'
+                                            (entry.status === 'draft' || entry.status === 'rejected')
                                           );
-                                          if (draftEntry) openEditEntry(draftEntry);
+                                          if (editableEntry) openEditEntry(editableEntry);
                                         }}
                                       >
                                         <Edit className="h-3 w-3" />

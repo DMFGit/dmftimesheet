@@ -138,14 +138,17 @@ export const useTimeEntries = () => {
 
     setLoading(true);
     
+    // Find the existing entry to check its current status
+    const existingEntry = timeEntries.find(entry => entry.id === entryId);
+    
     // For rejected entries, reset status to draft and clear review data
-    const updateData = {
+    const updateData = existingEntry?.status === 'rejected' ? {
       ...entryData,
       status: 'draft',
       reviewed_at: null,
       reviewed_by: null,
       review_notes: null
-    };
+    } : entryData;
     
     const { data, error } = await supabase
       .from('Time_Entries')
@@ -166,6 +169,13 @@ export const useTimeEntries = () => {
       setTimeEntries(prev => prev.map(entry => 
         entry.id === entryId ? data as TimeEntry : entry
       ));
+      
+      if (existingEntry?.status === 'rejected') {
+        toast({
+          title: "Entry Updated",
+          description: "Rejected entry has been updated and reset to draft status.",
+        });
+      }
     }
 
     setLoading(false);
