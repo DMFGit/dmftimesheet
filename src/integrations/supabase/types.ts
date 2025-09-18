@@ -434,6 +434,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_employee_data_admin_only: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active: boolean
+          default_billing_rate: number
+          email: string
+          id: string
+          name: string
+          role: string
+          user_id: string
+        }[]
+      }
+      get_employee_name_by_id: {
+        Args: { employee_id: string }
+        Returns: string
+      }
       get_project_data_admin_only: {
         Args: Record<PropertyKey, never>
         Returns: {

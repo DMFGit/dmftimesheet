@@ -45,29 +45,32 @@ export default function AdminReview() {
 
   const fetchPendingTimeEntries = async () => {
     try {
+      // Fetch time entries without direct employee joins for security
       const { data, error } = await supabase
         .from('Time_Entries')
-        .select(`
-          *,
-          Employees!Time_Entries_employee_id_fkey(name)
-        `)
+        .select('*')
         .eq('status', 'submitted')
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
 
-      // Enrich with project/task info
+      // Enrich with employee names and project/task info using secure functions
       const enrichedEntries = await Promise.all(
         data.map(async (entry: any) => {
+          // Get employee name securely through admin function
+          const { data: employeeName, error: nameError } = await supabase
+            .rpc('get_employee_name_by_id', { employee_id: entry.employee_id });
+
+          // Get project/task info from budget data
           const { data: budgetData } = await supabase
             .from('Project_Budgets')
             .select('Project_Name, Task_Description, Subtask_Description')
             .eq('WBS Code', entry.wbs_code)
-            .single();
+            .maybeSingle();
 
           return {
             ...entry,
-            employee_name: entry.Employees.name,
+            employee_name: nameError ? 'Unknown Employee' : employeeName,
             project_name: budgetData?.Project_Name,
             task_description: budgetData?.Task_Description,
             subtask_description: budgetData?.Subtask_Description,
@@ -102,29 +105,32 @@ export default function AdminReview() {
 
   const fetchDraftTimeEntries = async () => {
     try {
+      // Fetch draft time entries without direct employee joins for security
       const { data, error } = await supabase
         .from('Time_Entries')
-        .select(`
-          *,
-          Employees!Time_Entries_employee_id_fkey(name)
-        `)
+        .select('*')
         .eq('status', 'draft')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
-      // Enrich with project/task info
+      // Enrich with employee names and project/task info using secure functions
       const enrichedDraftEntries = await Promise.all(
         data.map(async (entry: any) => {
+          // Get employee name securely through admin function
+          const { data: employeeName, error: nameError } = await supabase
+            .rpc('get_employee_name_by_id', { employee_id: entry.employee_id });
+
+          // Get project/task info from budget data
           const { data: budgetData } = await supabase
             .from('Project_Budgets')
             .select('Project_Name, Task_Description, Subtask_Description')
             .eq('WBS Code', entry.wbs_code)
-            .single();
+            .maybeSingle();
 
           return {
             ...entry,
-            employee_name: entry.Employees.name,
+            employee_name: nameError ? 'Unknown Employee' : employeeName,
             project_name: budgetData?.Project_Name,
             task_description: budgetData?.Task_Description,
             subtask_description: budgetData?.Subtask_Description,
