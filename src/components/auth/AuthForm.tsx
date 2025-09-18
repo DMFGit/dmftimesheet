@@ -21,12 +21,10 @@ export const AuthForm = () => {
 
   const handleMicrosoftSignIn = async () => {
     console.log('Microsoft sign-in button clicked');
-    console.log('Current window location:', window.location.href);
     setLoading(true);
     
     try {
       console.log('Attempting to sign in with Azure OAuth...');
-      console.log('Redirect URL will be:', `${window.location.origin}/`);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
@@ -35,9 +33,6 @@ export const AuthForm = () => {
         },
       });
 
-      console.log('OAuth response data:', data);
-      console.log('OAuth response error:', error);
-
       if (error) {
         console.error('Microsoft OAuth error:', error);
         toast({
@@ -45,15 +40,20 @@ export const AuthForm = () => {
           description: error.message,
           variant: "destructive",
         });
+        setLoading(false);
+      } else if (data?.url) {
+        console.log('Redirecting to Microsoft login:', data.url);
+        // Force redirect to Microsoft login page
+        window.location.href = data.url;
+        // Don't set loading to false here since we're redirecting
       } else {
-        console.log('Microsoft OAuth response successful:', data);
-        // Check if we should be redirected
-        if (data?.url) {
-          console.log('Redirecting to:', data.url);
-          window.location.href = data.url;
-        } else {
-          console.warn('No redirect URL returned from OAuth');
-        }
+        console.error('No redirect URL returned from OAuth');
+        toast({
+          title: "Error",
+          description: "OAuth configuration error - no redirect URL returned.",
+          variant: "destructive",
+        });
+        setLoading(false);
       }
     } catch (error) {
       console.error('Microsoft sign-in error:', error);
@@ -62,7 +62,6 @@ export const AuthForm = () => {
         description: "Failed to sign in with Microsoft.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
