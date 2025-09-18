@@ -153,7 +153,7 @@ export const AuthForm = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            <img src="/DMF_Logo-02.svg" alt="DMF Logo" className="h-16 w-auto" />
+            <img src="/DMF_Logo-06.png" alt="DMF Logo" className="h-16 w-auto" />
           </div>
           <div className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
@@ -220,27 +220,31 @@ export const AuthForm = () => {
             </Button>
           </form>
 
-          <div className="mt-4 space-y-2 text-center">
+          <div className="mt-4 space-y-3 text-center">
             {!isSignUp && (
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                disabled={loading}
-                className="text-sm text-primary hover:underline disabled:opacity-50"
-              >
-                Forgot your password?
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="text-sm text-primary hover:underline disabled:opacity-50"
+                >
+                  Forgot your password?
+                </button>
+              </div>
             )}
             
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-primary hover:underline"
-            >
-              {isSignUp 
-                ? "Already have an account? Sign in" 
-                : "Don't have an account? Sign up"}
-            </button>
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-primary hover:underline"
+              >
+                {isSignUp 
+                  ? "Already have an account? Sign in" 
+                  : "Don't have an account? Sign up"}
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
