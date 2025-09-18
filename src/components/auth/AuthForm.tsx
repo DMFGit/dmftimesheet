@@ -20,7 +20,11 @@ export const AuthForm = () => {
   const { toast } = useToast();
 
   const handleMicrosoftSignIn = async () => {
+    console.log('Microsoft sign-in button clicked');
+    setLoading(true);
+    
     try {
+      console.log('Attempting to sign in with Azure OAuth...');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
         options: {
@@ -29,18 +33,24 @@ export const AuthForm = () => {
       });
 
       if (error) {
+        console.error('Microsoft OAuth error:', error);
         toast({
           title: "Authentication Error",
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log('Microsoft OAuth initiated successfully');
       }
     } catch (error) {
+      console.error('Microsoft sign-in error:', error);
       toast({
         title: "Error",
         description: "Failed to sign in with Microsoft.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
