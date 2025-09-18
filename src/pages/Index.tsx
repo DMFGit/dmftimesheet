@@ -634,7 +634,7 @@ const Index = () => {
                                   {project.projectName}
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent className="max-w-xs bg-yellow-100 border-yellow-300">
+                              <TooltipContent className="max-w-xs bg-warning-light border-warning">
                                 <div className="space-y-1">
                                   <div className="font-semibold">{project.projectName}</div>
                                   {(() => {
@@ -677,7 +677,7 @@ const Index = () => {
                                              {hours}h
                                            </Badge>
                                          </TooltipTrigger>
-                                          <TooltipContent className="max-w-xs bg-yellow-100 border-yellow-300">
+                                          <TooltipContent className="max-w-xs bg-warning-light border-warning">
                                             <div className="space-y-1">
                                               <div className="font-semibold">{hours} hours</div>
                                               {(() => {
