@@ -21,10 +21,23 @@ export const AuthForm = () => {
 
   const handleMicrosoftSignIn = async () => {
     console.log('Microsoft sign-in button clicked');
+    console.log('Testing if we are in an iframe:', window !== window.top);
+    console.log('User agent:', navigator.userAgent);
+    
+    // Test if OAuth is blocked in this environment
+    if (window !== window.top) {
+      toast({
+        title: "OAuth Not Available in Preview",
+        description: "Microsoft OAuth doesn't work in preview mode. Please deploy your app to test OAuth authentication.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
     
     try {
-      console.log('Attempting to sign in with Azure OAuth...');
+      console.log('Environment check passed, attempting OAuth...');
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
@@ -33,7 +46,7 @@ export const AuthForm = () => {
         },
       });
 
-      console.log('OAuth complete - data:', data, 'error:', error);
+      console.log('OAuth result - data:', data, 'error:', error);
 
       if (error) {
         console.error('Microsoft OAuth error:', error);
@@ -42,40 +55,9 @@ export const AuthForm = () => {
           description: error.message,
           variant: "destructive",
         });
-        setLoading(false);
       } else if (data?.url) {
-        console.log('About to redirect to:', data.url);
-        
-        // Try multiple redirect methods
-        try {
-          console.log('Attempting window.location.href redirect...');
-          window.location.href = data.url;
-          console.log('window.location.href executed');
-        } catch (redirectError) {
-          console.error('window.location.href failed:', redirectError);
-          
-          // Fallback: try window.open
-          console.log('Trying window.open fallback...');
-          const popup = window.open(data.url, '_self');
-          if (!popup) {
-            console.error('window.open was blocked');
-            toast({
-              title: "Popup Blocked",
-              description: "Please allow popups and try again, or manually visit: " + data.url,
-              variant: "destructive",
-            });
-          }
-        }
-        
-        // Don't set loading to false since we're redirecting
-      } else {
-        console.error('No redirect URL returned from OAuth');
-        toast({
-          title: "Error",
-          description: "OAuth configuration error - no redirect URL returned.",
-          variant: "destructive",
-        });
-        setLoading(false);
+        console.log('Redirecting to:', data.url);
+        window.location.href = data.url;
       }
     } catch (error) {
       console.error('Microsoft sign-in error:', error);
@@ -84,6 +66,7 @@ export const AuthForm = () => {
         description: "Failed to sign in with Microsoft.",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
