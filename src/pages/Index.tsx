@@ -744,28 +744,45 @@ const Index = () => {
                                        )}
                                      </div>
                                     
-                                    {/* Show edit button for draft and rejected entries */}
-                                    {weekTimeEntries.some(entry => 
-                                      entry.entry_date === dayKey && 
-                                      entry.wbs_code === projectKey && 
-                                      (entry.status === 'draft' || entry.status === 'rejected')
-                                    ) && (
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="w-6 h-6 p-0 text-muted-foreground hover:text-primary"
-                                        onClick={() => {
-                                          const editableEntry = weekTimeEntries.find(entry => 
-                                            entry.entry_date === dayKey && 
-                                            entry.wbs_code === projectKey && 
-                                            (entry.status === 'draft' || entry.status === 'rejected')
-                                          );
-                                          if (editableEntry) openEditEntry(editableEntry);
-                                        }}
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
-                                    )}
+                                     {/* Show edit and delete buttons for draft and rejected entries */}
+                                     {weekTimeEntries.some(entry => 
+                                       entry.entry_date === dayKey && 
+                                       entry.wbs_code === projectKey && 
+                                       (entry.status === 'draft' || entry.status === 'rejected')
+                                     ) && (
+                                       <div className="flex gap-1">
+                                         <Button
+                                           variant="ghost"
+                                           size="sm"
+                                           className="w-6 h-6 p-0 text-muted-foreground hover:text-primary"
+                                           onClick={() => {
+                                             const editableEntry = weekTimeEntries.find(entry => 
+                                               entry.entry_date === dayKey && 
+                                               entry.wbs_code === projectKey && 
+                                               (entry.status === 'draft' || entry.status === 'rejected')
+                                             );
+                                             if (editableEntry) openEditEntry(editableEntry);
+                                           }}
+                                         >
+                                           <Edit className="h-3 w-3" />
+                                         </Button>
+                                         <Button
+                                           variant="ghost"
+                                           size="sm"
+                                           className="w-6 h-6 p-0 text-muted-foreground hover:text-destructive"
+                                           onClick={() => {
+                                             const deletableEntry = weekTimeEntries.find(entry => 
+                                               entry.entry_date === dayKey && 
+                                               entry.wbs_code === projectKey && 
+                                               (entry.status === 'draft' || entry.status === 'rejected')
+                                             );
+                                             if (deletableEntry) handleDeleteEntry(deletableEntry.id);
+                                           }}
+                                         >
+                                           <Trash2 className="h-3 w-3" />
+                                         </Button>
+                                       </div>
+                                     )}
                                   </div>
                                 ) : (
                                   <Button
