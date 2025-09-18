@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +55,8 @@ const Index = () => {
     startOfWeek(new Date(), { weekStartsOn: 0 })
   );
   
+  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
+  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const [quickEntryForm, setQuickEntryForm] = useState<QuickEntryForm>({
     selectedDate: '',
@@ -176,6 +178,22 @@ const Index = () => {
 
     return Array.from(uniqueEntries.values());
   }, [timeEntries, budgetItems]);
+
+  const dailyEntries = useMemo(() => {
+    return timeEntries
+      .filter(entry => entry.entry_date === selectedDate)
+      .map(entry => {
+        const budgetItem = budgetItems.find(item => item.wbs_code === entry.wbs_code);
+        return {
+          ...entry,
+          projectName: budgetItem?.project_name || '',
+          taskDescription: budgetItem?.task_description || '',
+          subtaskDescription: budgetItem?.subtask_description || '',
+          contract: budgetItem?.contract || ''
+        };
+      })
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [timeEntries, budgetItems, selectedDate]);
 
   // NOW conditional returns can happen AFTER all hooks
   if (authLoading) {
@@ -346,62 +364,127 @@ const Index = () => {
         </div>
 
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Weekly Timesheet</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              {viewMode === 'weekly' ? 'Weekly Timesheet' : 'Daily Timesheet'}
+            </h1>
             <p className="text-muted-foreground">
-              Week of {format(currentWeekStart, 'MMM d')} - {format(addDays(currentWeekStart, 6), 'MMM d, yyyy')}
+              {viewMode === 'weekly' 
+                ? `Week of ${format(currentWeekStart, 'MMM d')} - ${format(addDays(currentWeekStart, 6), 'MMM d, yyyy')}`
+                : format(parseDateSafe(selectedDate), 'EEEE, MMMM d, yyyy')
+              }
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateWeek('prev')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous Week
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToCurrentWeek}
-              className="px-3"
-            >
-              <Calendar className="h-4 w-4" />
-              Current Week
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateWeek('next')}
-            >
-              Next Week
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* View Mode Toggle */}
+            <div className="flex items-center space-x-1 p-1 bg-muted rounded-lg">
+              <Button
+                variant={viewMode === 'weekly' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('weekly')}
+                className="flex-1"
+              >
+                <Grid className="h-4 w-4 mr-2" />
+                Weekly
+              </Button>
+              <Button
+                variant={viewMode === 'daily' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('daily')}
+                className="flex-1"
+              >
+                <List className="h-4 w-4 mr-2" />
+                Daily
+              </Button>
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center gap-2">
+              {viewMode === 'weekly' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateWeek('prev')}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous Week
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={goToCurrentWeek}
+                    className="px-3"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Current Week
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateWeek('next')}
+                  >
+                    Next Week
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedDate(format(addDays(parseDateSafe(selectedDate), -1), 'yyyy-MM-dd'))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous Day
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedDate(format(new Date(), 'yyyy-MM-dd'))}
+                    className="px-3"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Today
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedDate(format(addDays(parseDateSafe(selectedDate), 1), 'yyyy-MM-dd'))}
+                  >
+                    Next Day
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Weekly Calendar Grid */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Time Entry Summary
-              </CardTitle>
-              <Button 
-                size="sm" 
-                onClick={() => openQuickEntry(format(new Date(), 'yyyy-MM-dd'))}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Quick Add
-              </Button>
-            </div>
-          </CardHeader>
+        {/* Content based on view mode */}
+        {viewMode === 'weekly' ? (
+          <Card className="shadow-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Time Entry Summary
+                </CardTitle>
+                <Button 
+                  size="sm" 
+                  onClick={() => openQuickEntry(format(new Date(), 'yyyy-MM-dd'))}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Entry
+                </Button>
+              </div>
+            </CardHeader>
           <CardContent>
             {authLoading || timeEntriesLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -527,12 +610,128 @@ const Index = () => {
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-lg font-medium text-muted-foreground">No time entries for this week</p>
                 <p className="text-sm text-muted-foreground">
-                  Click the + buttons or Quick Add to create time entries
+                  Click the + buttons or Add Entry to create time entries
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
+        ) : (
+          /* Daily View */
+          <Card className="shadow-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Daily Time Entries - {format(parseDateSafe(selectedDate), 'MMM d, yyyy')}
+                </CardTitle>
+                <Button 
+                  size="sm" 
+                  onClick={() => openQuickEntry(selectedDate)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Entry
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {authLoading || timeEntriesLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : dailyEntries.length > 0 ? (
+                <div className="space-y-4">
+                  {dailyEntries.map((entry) => (
+                    <div key={entry.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs font-mono">
+                              {entry.wbs_code}
+                            </Badge>
+                            <Badge 
+                              variant={entry.status === 'approved' ? 'default' : entry.status === 'rejected' ? 'destructive' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {entry.status}
+                            </Badge>
+                          </div>
+                          
+                          <h3 className="font-semibold text-lg mb-1">{entry.projectName}</h3>
+                          
+                          <div className="space-y-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">Task:</span>
+                              <span>{entry.taskDescription}</span>
+                            </div>
+                            
+                            {entry.subtaskDescription && (
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">Subtask:</span>
+                                <span>{entry.subtaskDescription}</span>
+                              </div>
+                            )}
+                            
+                            {entry.contract && (
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">Contract:</span>
+                                <span>{entry.contract}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary mb-1">
+                            {entry.hours}h
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {format(new Date(entry.created_at), 'h:mm a')}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {entry.description && (
+                        <div className="border-t border-border pt-3 mt-3">
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm font-medium text-muted-foreground min-w-fit">Description:</span>
+                            <p className="text-sm text-foreground">{entry.description}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {entry.review_notes && (
+                        <div className="border-t border-border pt-3 mt-3">
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm font-medium text-muted-foreground min-w-fit">Review Notes:</span>
+                            <p className="text-sm text-destructive">{entry.review_notes}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  <div className="border-t border-border pt-4 mt-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-muted-foreground">Total Hours:</span>
+                      <span className="text-lg font-bold text-primary">
+                        {dailyEntries.reduce((sum, entry) => sum + Number(entry.hours), 0)}h
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium text-muted-foreground">No time entries for this date</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click Add Entry to create your first time entry for {format(parseDateSafe(selectedDate), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Entry Dialog */}
         <Dialog open={quickEntryOpen} onOpenChange={setQuickEntryOpen}>
