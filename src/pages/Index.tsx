@@ -419,13 +419,23 @@ const Index = () => {
   const submittedEntries = weekTimeEntries.filter(entry => entry.status === 'submitted');
   const hasUnsubmittedEntries = draftEntries.length > 0;
 
+  // Calculate billable hours (entries with budget amounts)
+  const billableHours = weekTimeEntries
+    .filter(entry => {
+      const budgetItem = budgetItems.find(item => item.wbs_code === entry.wbs_code);
+      return budgetItem && (budgetItem.budget_amount || budgetItem.dmf_budget_amount);
+    })
+    .reduce((sum, entry) => sum + Number(entry.hours), 0);
+  
+  const billablePercentage = weeklyHours > 0 ? (billableHours / 40) * 100 : 0;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card className="shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -434,6 +444,19 @@ const Index = () => {
                   <p className="text-2xl font-bold text-primary">{weeklyHours}h</p>
                 </div>
                 <CalendarDays className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Billable %</p>
+                  <p className="text-2xl font-bold text-warning">{billablePercentage.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">{billableHours}h of 40h</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
@@ -457,7 +480,7 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground">Active Projects</p>
                   <p className="text-2xl font-bold text-foreground">{getUniqueProjects().length}</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-warning" />
+                <Users className="h-8 w-8 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
@@ -471,7 +494,7 @@ const Index = () => {
                     {Math.round((weeklyHours / 7) * 10) / 10}h
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-muted-foreground" />
+                <Clock className="h-8 w-8 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
