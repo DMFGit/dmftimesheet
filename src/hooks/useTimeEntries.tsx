@@ -137,12 +137,22 @@ export const useTimeEntries = () => {
     if (!employee) return;
 
     setLoading(true);
+    
+    // For rejected entries, reset status to draft and clear review data
+    const updateData = {
+      ...entryData,
+      status: 'draft',
+      reviewed_at: null,
+      reviewed_by: null,
+      review_notes: null
+    };
+    
     const { data, error } = await supabase
       .from('Time_Entries')
-      .update(entryData)
+      .update(updateData)
       .eq('id', entryId)
       .eq('employee_id', employee.id)
-      .eq('status', 'draft') // Only allow updating draft entries
+      .in('status', ['draft', 'rejected']) // Allow updating draft and rejected entries
       .select()
       .single();
 
@@ -170,7 +180,7 @@ export const useTimeEntries = () => {
       .delete()
       .eq('id', entryId)
       .eq('employee_id', employee.id)
-      .eq('status', 'draft'); // Only allow deleting draft entries
+      .in('status', ['draft', 'rejected']); // Allow deleting draft and rejected entries
 
     if (error) {
       toast({

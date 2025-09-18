@@ -838,9 +838,21 @@ const Index = () => {
                               {entry.status}
                             </Badge>
                             
-                            {/* Edit and Delete buttons for draft entries */}
-                            {entry.status === 'draft' && (
+                            {/* Edit and Delete buttons for draft and rejected entries */}
+                            {(entry.status === 'draft' || entry.status === 'rejected') && (
                               <div className="flex items-center gap-1 ml-auto">
+                                {entry.status === 'rejected' && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="outline" className="text-xs text-warning">
+                                        Fix & Resubmit
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Edit this rejected entry to fix issues and resubmit</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
