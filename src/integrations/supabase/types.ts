@@ -519,6 +519,10 @@ export type Database = {
           task_unit: string | null
         }[]
       }
+      log_sensitive_access: {
+        Args: { action: string; table_name: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
