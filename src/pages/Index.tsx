@@ -448,15 +448,15 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-md">
+          <Card className="shadow-md border-warning/20 bg-warning-light/30">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Billable %</p>
-                  <p className="text-2xl font-bold text-warning">{billablePercentage.toFixed(1)}%</p>
-                  <p className="text-xs text-muted-foreground">{billableHours}h of 40h</p>
+                  <p className="text-sm font-medium text-warning-foreground">Billable %</p>
+                  <p className="text-3xl font-bold text-warning">{billablePercentage.toFixed(1)}%</p>
+                  <p className="text-sm font-medium text-warning-foreground/80">{billableHours}h of 40h target</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-warning" />
+                <TrendingUp className="h-10 w-10 text-warning" />
               </div>
             </CardContent>
           </Card>
