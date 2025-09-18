@@ -23,25 +23,44 @@ export const PasswordResetForm = () => {
   useEffect(() => {
     // Check if we have a valid password reset session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Check if this is a password reset session by checking for the recovery event
+      // Check URL parameters first
       const urlParams = new URLSearchParams(window.location.search);
       const accessToken = urlParams.get('access_token');
       const refreshToken = urlParams.get('refresh_token');
       const type = urlParams.get('type');
       
-      if (type === 'recovery' && (accessToken || session)) {
+      // If we have recovery type in URL, this is a valid reset session
+      if (type === 'recovery') {
         setIsValidSession(true);
-      } else {
-        // Redirect to login if no valid reset session
-        toast({
-          title: "Invalid Reset Link",
-          description: "This password reset link is invalid or has expired. Please request a new one.",
-          variant: "destructive",
-        });
-        navigate('/');
+        return;
       }
+      
+      // Check if user came from a password reset email (alternative check)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check if the session was created recently (within last 5 minutes) which might indicate a reset flow
+      if (session?.user && accessToken) {
+        setIsValidSession(true);
+        return;
+      }
+      
+      // If we have a hash fragment that might contain tokens, try to parse it
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const hashAccessToken = hashParams.get('access_token');
+      const hashType = hashParams.get('type');
+      
+      if (hashType === 'recovery' && hashAccessToken) {
+        setIsValidSession(true);
+        return;
+      }
+      
+      // If no valid reset indicators found, redirect to login
+      toast({
+        title: "Invalid Reset Link",
+        description: "This password reset link is invalid or has expired. Please request a new one.",
+        variant: "destructive",
+      });
+      navigate('/');
     };
 
     checkSession();
