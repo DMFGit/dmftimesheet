@@ -8,7 +8,7 @@ export const SecurityStatus = () => {
   const { user, employee } = useAuth();
   
   // Only show to admin users
-  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
+  const isAdmin = employee?.role === 'admin';
 
   if (!isAdmin) {
     return null;

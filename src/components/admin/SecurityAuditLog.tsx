@@ -27,7 +27,7 @@ export const SecurityAuditLog = () => {
   const [loading, setLoading] = useState(true);
 
   // Only show to admin users
-  const isAdmin = employee?.role === 'admin' || user?.email === 'dina@dmfengineering.com';
+  const isAdmin = employee?.role === 'admin';
 
   useEffect(() => {
     if (!isAdmin) return;
