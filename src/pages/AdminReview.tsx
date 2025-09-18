@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Clock, User, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, User, FileText, CheckCircle, XCircle, BarChart3, TrendingUp, Users, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { parseDateSafe } from '@/lib/utils';
+import { Header } from '@/components/layout/header';
 
 interface TimeEntryWithEmployee extends TimeEntry {
   employee_name?: string;
@@ -23,6 +24,12 @@ export default function AdminReview() {
   const [timeEntries, setTimeEntries] = useState<TimeEntryWithEmployee[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewNotes, setReviewNotes] = useState<{ [key: string]: string }>({});
+  const [dashboardStats, setDashboardStats] = useState({
+    totalPending: 0,
+    totalHours: 0,
+    totalEmployees: 0,
+    avgHoursPerEntry: 0
+  });
   const { toast } = useToast();
 
   // Check admin access
@@ -67,6 +74,17 @@ export default function AdminReview() {
       );
 
       setTimeEntries(enrichedEntries);
+      
+      // Calculate dashboard stats
+      const totalHours = enrichedEntries.reduce((sum, entry) => sum + Number(entry.hours), 0);
+      const uniqueEmployees = new Set(enrichedEntries.map(entry => entry.employee_id)).size;
+      
+      setDashboardStats({
+        totalPending: enrichedEntries.length,
+        totalHours: totalHours,
+        totalEmployees: uniqueEmployees,
+        avgHoursPerEntry: enrichedEntries.length > 0 ? totalHours / enrichedEntries.length : 0
+      });
     } catch (error) {
       console.error('Error fetching time entries:', error);
       toast({
@@ -129,8 +147,21 @@ export default function AdminReview() {
         description: `Time entry ${status} successfully and notification sent`,
       });
 
-      // Remove from list
-      setTimeEntries(prev => prev.filter(entry => entry.id !== entryId));
+      // Remove from list and update stats
+      setTimeEntries(prev => {
+        const updatedEntries = prev.filter(entry => entry.id !== entryId);
+        const totalHours = updatedEntries.reduce((sum, entry) => sum + Number(entry.hours), 0);
+        const uniqueEmployees = new Set(updatedEntries.map(entry => entry.employee_id)).size;
+        
+        setDashboardStats({
+          totalPending: updatedEntries.length,
+          totalHours: totalHours,
+          totalEmployees: uniqueEmployees,
+          avgHoursPerEntry: updatedEntries.length > 0 ? totalHours / updatedEntries.length : 0
+        });
+        
+        return updatedEntries;
+      });
       
       // Clear review notes
       setReviewNotes(prev => {
@@ -151,56 +182,146 @@ export default function AdminReview() {
 
   if (!isAdmin) {
     return (
-      <div className="container mx-auto p-6">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">Access denied. Admin privileges required.</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto p-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <p className="text-muted-foreground">Access denied. Admin privileges required.</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Time Entry Review</h1>
-        <p className="text-muted-foreground">
-          Review and approve submitted time entries
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Page Header */}
+        <div className="border-b border-border pb-6">
+          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-lg">
+            Review and manage submitted time entries
+          </p>
+        </div>
 
-      {timeEntries.length === 0 ? (
-        <Card>
-          <CardContent className="p-6 text-center">
-            <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No time entries pending review</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {timeEntries.map((entry) => (
-            <Card key={entry.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
-                    {entry.employee_name}
-                  </CardTitle>
-                  <Badge variant="secondary">
-                    {entry.status}
-                  </Badge>
-                </div>
-              </CardHeader>
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Pending Reviews
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.totalPending}</div>
+              <p className="text-xs text-muted-foreground">
+                {dashboardStats.totalPending === 0 ? "All caught up!" : "Entries waiting for review"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Hours
+              </CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.totalHours.toFixed(1)}</div>
+              <p className="text-xs text-muted-foreground">
+                Hours pending approval
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Employees
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.totalEmployees}</div>
+              <p className="text-xs text-muted-foreground">
+                With pending entries
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Avg Hours/Entry
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardStats.avgHoursPerEntry.toFixed(1)}</div>
+              <p className="text-xs text-muted-foreground">
+                Average per submission
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Pending Reviews</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchPendingTimeEntries}
+              disabled={loading}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+
+          {timeEntries.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <CheckCircle className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+                <h3 className="text-lg font-semibold mb-2">All reviews complete!</h3>
+                <p className="text-muted-foreground">No time entries pending review at the moment.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {timeEntries.map((entry) => (
+                <Card key={entry.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl font-semibold">
+                        {entry.employee_name}
+                      </CardTitle>
+                      <Badge variant="secondary" className="text-sm">
+                        {entry.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="flex items-center gap-2">
@@ -281,12 +402,14 @@ export default function AdminReview() {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Approve
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                </CardContent>
+              </Card>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
