@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
+import DMFLogo from "@/assets/DMF_Logo-02.svg";
 
 export const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -15,6 +16,7 @@ export const AuthForm = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -71,6 +73,45 @@ export const AuthForm = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/`,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Check your email for password reset instructions.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -111,15 +152,20 @@ export const AuthForm = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            {isSignUp ? "Create Account" : "Welcome Back"}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isSignUp 
-              ? "Enter your details to create your timesheet account" 
-              : "Enter your credentials to access your timesheet"}
-          </CardDescription>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <img src={DMFLogo} alt="DMF Logo" className="h-16 w-auto" />
+          </div>
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              {isSignUp ? "Create Account" : "Welcome Back"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {isSignUp 
+                ? "Enter your details to create your timesheet account" 
+                : "Enter your credentials to access your timesheet"}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">{/* Microsoft OAuth temporarily hidden */}
@@ -151,13 +197,22 @@ export const AuthForm = () => {
             
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
@@ -166,7 +221,18 @@ export const AuthForm = () => {
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4 space-y-2 text-center">
+            {!isSignUp && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={loading}
+                className="text-sm text-primary hover:underline disabled:opacity-50"
+              >
+                Forgot your password?
+              </button>
+            )}
+            
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
