@@ -122,35 +122,7 @@ export const AuthForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleMicrosoftSignIn}
-            >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 23 23">
-                <path fill="#f35325" d="M1 1h10v10H1z"/>
-                <path fill="#81bc06" d="M12 1h10v10H12z"/>
-                <path fill="#05a6f0" d="M1 12h10v10H1z"/>
-                <path fill="#ffba08" d="M12 12h10v10H12z"/>
-              </svg>
-              Continue with Microsoft
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <form onSubmit={handleSubmit} className="space-y-4">{/* Microsoft OAuth temporarily hidden */}
             {isSignUp && (
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
