@@ -443,6 +443,10 @@ export type Database = {
       }
     }
     Functions: {
+      create_employee_for_oauth_user: {
+        Args: { p_email: string; p_name: string; p_user_id: string }
+        Returns: string
+      }
       get_budget_items: {
         Args: Record<PropertyKey, never>
         Returns: {

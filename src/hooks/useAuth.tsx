@@ -89,25 +89,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       
-      // If no employee exists, create one for OAuth users
+      // If no employee exists, create one using the secure function
       if (!data && user.email) {
-        const { data: newEmployee, error: insertError } = await supabase
-          .from('Employees')
-          .insert({
-            user_id: user.id,
-            name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0],
-            email: user.email,
-            role: 'employee', // Default role
-            active: true,
-            'Default Billing Rate': 0
-          })
-          .select()
-          .single();
+        const { data: employeeId, error: functionError } = await supabase
+          .rpc('create_employee_for_oauth_user', {
+            p_user_id: user.id,
+            p_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0],
+            p_email: user.email
+          });
         
-        if (newEmployee && !insertError) {
-          setEmployee(newEmployee);
+        if (employeeId && !functionError) {
+          // Fetch the created employee record
+          const { data: newEmployee } = await supabase
+            .from('Employees')
+            .select('*')
+            .eq('id', employeeId)
+            .single();
+          
+          if (newEmployee) {
+            setEmployee(newEmployee);
+          }
         } else {
-          console.error('Error creating employee:', insertError);
+          console.error('Error creating employee:', functionError);
           setEmployee(null);
         }
       } else {
