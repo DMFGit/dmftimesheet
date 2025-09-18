@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import DMFLogo from "@/assets/DMF_Logo-02.svg";
 
 export const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -154,7 +153,7 @@ export const AuthForm = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            <img src={DMFLogo} alt="DMF Logo" className="h-16 w-auto" />
+            <img src="/DMF_Logo-02.svg" alt="DMF Logo" className="h-16 w-auto" />
           </div>
           <div className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
