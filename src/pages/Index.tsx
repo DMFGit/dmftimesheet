@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye, Edit, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useToast } from "@/hooks/use-toast";
@@ -644,29 +644,40 @@ const Index = () => {
                             return (
                               <td key={index} className="p-3 border-b border-border text-center">
                                 {hours > 0 ? (
-                                  <div className="flex flex-col items-center gap-1">
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Badge
-                                          variant={hours >= 8 ? "default" : "secondary"}
-                                          className="cursor-help"
-                                        >
-                                          {hours}h
-                                        </Badge>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs">
-                                        <div className="space-y-1">
-                                          <div className="font-semibold">{hours} hours</div>
-                                          {descriptions.length > 0 && (
-                                            <div className="text-sm">
-                                              {descriptions.map((desc, i) => (
-                                                <div key={i}>• {desc}</div>
-                                              ))}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </TooltipContent>
-                                    </Tooltip>
+                                   <div className="flex flex-col items-center gap-1">
+                                     <div className="flex items-center gap-1">
+                                       <Tooltip>
+                                         <TooltipTrigger asChild>
+                                           <Badge
+                                             variant={hours >= 8 ? "default" : "secondary"}
+                                             className="cursor-help"
+                                           >
+                                             {hours}h
+                                           </Badge>
+                                         </TooltipTrigger>
+                                         <TooltipContent className="max-w-xs">
+                                           <div className="space-y-1">
+                                             <div className="font-semibold">{hours} hours</div>
+                                             {descriptions.length > 0 && (
+                                               <div className="text-sm">
+                                                 {descriptions.map((desc, i) => (
+                                                   <div key={i}>• {desc}</div>
+                                                 ))}
+                                               </div>
+                                             )}
+                                           </div>
+                                         </TooltipContent>
+                                       </Tooltip>
+                                       
+                                       {/* Red warning indicator for rejected entries */}
+                                       {weekTimeEntries.some(entry => 
+                                         entry.entry_date === dayKey && 
+                                         entry.wbs_code === projectKey && 
+                                         entry.status === 'rejected'
+                                       ) && (
+                                         <AlertTriangle className="h-3 w-3 text-destructive" />
+                                       )}
+                                     </div>
                                     
                                     {/* Show edit button for draft and rejected entries */}
                                     {weekTimeEntries.some(entry => 
@@ -827,16 +838,21 @@ const Index = () => {
                     <div key={entry.id} className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs font-mono">
-                              {entry.wbs_code}
-                            </Badge>
-                            <Badge 
-                              variant={entry.status === 'approved' ? 'default' : entry.status === 'rejected' ? 'destructive' : 'secondary'}
-                              className="text-xs"
-                            >
-                              {entry.status}
-                            </Badge>
+                           <div className="flex items-center gap-2 mb-2">
+                             <Badge variant="outline" className="text-xs font-mono">
+                               {entry.wbs_code}
+                             </Badge>
+                             <div className="flex items-center gap-1">
+                               <Badge 
+                                 variant={entry.status === 'approved' ? 'default' : entry.status === 'rejected' ? 'destructive' : 'secondary'}
+                                 className="text-xs"
+                               >
+                                 {entry.status}
+                               </Badge>
+                               {entry.status === 'rejected' && (
+                                 <AlertTriangle className="h-3 w-3 text-destructive" />
+                               )}
+                             </div>
                             
                             {/* Edit and Delete buttons for draft and rejected entries */}
                             {(entry.status === 'draft' || entry.status === 'rejected') && (
