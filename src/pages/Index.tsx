@@ -15,6 +15,7 @@ import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { parseDateSafe } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WeeklyData {
   [projectKey: string]: {
@@ -300,10 +301,75 @@ const Index = () => {
     });
   };
 
+  const handleSubmitTimesheet = async () => {
+    if (draftEntries.length === 0) {
+      toast({
+        title: "Info",
+        description: "No draft entries to submit",
+        variant: "default"
+      });
+      return;
+    }
+
+    try {
+      // Update all draft entries to submitted status
+      const { error } = await supabase
+        .from('Time_Entries')
+        .update({ 
+          status: 'submitted',
+          submitted_at: new Date().toISOString()
+        })
+        .eq('employee_id', employee?.id)
+        .eq('status', 'draft')
+        .gte('entry_date', format(currentWeekStart, 'yyyy-MM-dd'))
+        .lte('entry_date', format(addDays(currentWeekStart, 6), 'yyyy-MM-dd'));
+
+      if (error) throw error;
+
+      // Send notification to admin
+      try {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: 'timesheet_submitted',
+            employeeId: employee?.id,
+            weekDetails: {
+              weekStart: format(currentWeekStart, 'yyyy-MM-dd'),
+              weekEnd: format(addDays(currentWeekStart, 6), 'yyyy-MM-dd'),
+              totalHours: weeklyHours,
+              entryCount: draftEntries.length
+            }
+          },
+        });
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        // Don't fail the main operation if notification fails
+      }
+
+      toast({
+        title: "Success",
+        description: `Timesheet submitted successfully! ${draftEntries.length} entries submitted for review.`,
+      });
+
+      // Refresh data to update UI
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error submitting timesheet:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit timesheet. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const projects = Object.keys(weeklyData);
   const hasData = projects.length > 0;
   const weeklyHours = Object.values(dailyTotals).reduce((sum, hours) => sum + hours, 0);
   const approvedHours = weekTimeEntries.filter(entry => entry.status === 'approved').reduce((sum, entry) => sum + Number(entry.hours), 0);
+  const draftEntries = weekTimeEntries.filter(entry => entry.status === 'draft');
+  const submittedEntries = weekTimeEntries.filter(entry => entry.status === 'submitted');
+  const hasUnsubmittedEntries = draftEntries.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -604,6 +670,49 @@ const Index = () => {
                     </tr>
                   </tfoot>
                 </table>
+
+                {/* Weekly Summary & Submit Section */}
+                <div className="border-t border-border pt-6 mt-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-4">
+                        <div className="text-lg font-semibold">
+                          Weekly Total: <span className="text-2xl text-primary">{weeklyHours}h</span>
+                        </div>
+                        {weeklyHours >= 40 && (
+                          <Badge variant="default" className="text-sm">
+                            Full Week
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>Draft: {draftEntries.length} entries</span>
+                        <span>Submitted: {submittedEntries.length} entries</span>
+                        <span>Approved: {weekTimeEntries.filter(e => e.status === 'approved').length} entries</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      {hasUnsubmittedEntries && (
+                        <Button
+                          onClick={handleSubmitTimesheet}
+                          className="bg-primary hover:bg-primary/90"
+                          size="lg"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Submit Timesheet ({draftEntries.length} entries)
+                        </Button>
+                      )}
+                      
+                      {!hasUnsubmittedEntries && submittedEntries.length > 0 && (
+                        <Badge variant="secondary" className="text-sm px-3 py-2">
+                          <Clock className="h-4 w-4 mr-2" />
+                          Timesheet Submitted - Awaiting Review
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">

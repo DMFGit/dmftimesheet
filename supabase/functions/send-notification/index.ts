@@ -8,14 +8,20 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: 'time_entry_approved' | 'time_entry_rejected';
+  type: 'time_entry_approved' | 'time_entry_rejected' | 'timesheet_submitted';
   employeeId: string;
-  entryDetails: {
+  entryDetails?: {
     date: string;
     hours: number;
     projectName?: string;
     taskDescription?: string;
     wbsCode: string;
+  };
+  weekDetails?: {
+    weekStart: string;
+    weekEnd: string;
+    totalHours: number;
+    entryCount: number;
   };
   reviewNotes?: string;
 }
@@ -38,6 +44,7 @@ serve(async (req) => {
       type, 
       employeeId, 
       entryDetails, 
+      weekDetails,
       reviewNotes 
     }: NotificationRequest = await req.json();
 
@@ -52,6 +59,97 @@ serve(async (req) => {
 
     if (employeeError || !employee) {
       throw new Error('Employee not found');
+    }
+
+    // Handle timesheet submission notification
+    if (type === 'timesheet_submitted') {
+      // Get admin email (you can modify this logic as needed)
+      const { data: adminEmployee, error: adminError } = await supabaseClient
+        .from('Employees')
+        .select('name, email')
+        .eq('role', 'admin')
+        .single();
+
+      if (!adminError && adminEmployee) {
+        const emailSubject = `Timesheet Submitted for Review - ${employee.name}`;
+        
+        const adminEmailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+            <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #1f2937; margin: 0; font-size: 24px;">DMF Engineering - Admin Notification</h1>
+                <div style="width: 60px; height: 4px; background-color: #3b82f6; margin: 10px auto;"></div>
+              </div>
+
+              <div style="background-color: #3b82f615; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                <h2 style="color: #3b82f6; margin: 0 0 10px 0; font-size: 20px;">
+                  📋 New Timesheet Submitted
+                </h2>
+                <p style="margin: 0; color: #6b7280;">
+                  ${employee.name} has submitted their timesheet for review.
+                </p>
+              </div>
+
+              <div style="margin: 20px 0;">
+                <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Submission Details</h3>
+                <table style="width: 100%; border-collapse: collapse; background-color: #f9fafb; border-radius: 6px; overflow: hidden;">
+                  <tr>
+                    <td style="padding: 12px 16px; font-weight: bold; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Employee:</td>
+                    <td style="padding: 12px 16px; color: #1f2937; border-bottom: 1px solid #e5e7eb;">${employee.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; font-weight: bold; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Week Period:</td>
+                    <td style="padding: 12px 16px; color: #1f2937; border-bottom: 1px solid #e5e7eb;">${weekDetails?.weekStart} to ${weekDetails?.weekEnd}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; font-weight: bold; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Total Hours:</td>
+                    <td style="padding: 12px 16px; color: #1f2937; border-bottom: 1px solid #e5e7eb;">${weekDetails?.totalHours}h</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; font-weight: bold; color: #6b7280;">Entries Count:</td>
+                    <td style="padding: 12px 16px; color: #1f2937;">${weekDetails?.entryCount} entries</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center;">
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                  Please review the submitted timesheet in the admin dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        await resend.emails.send({
+          from: 'DMF Engineering <timesheet@dmfengineering.com>',
+          to: [adminEmployee.email],
+          subject: emailSubject,
+          html: adminEmailHtml,
+        });
+      }
+
+      // Create in-app notification for employee confirmation
+      await supabaseClient
+        .from('notifications')
+        .insert({
+          user_id: employee.user_id,
+          title: 'Timesheet Submitted',
+          message: `Your timesheet for week ${weekDetails?.weekStart} to ${weekDetails?.weekEnd} (${weekDetails?.totalHours}h) has been submitted for admin review.`,
+          type: 'info',
+          related_type: 'timesheet'
+        });
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Timesheet submission notification sent successfully' 
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const isApproved = type === 'time_entry_approved';
