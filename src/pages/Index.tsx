@@ -647,6 +647,9 @@ const Index = () => {
                                         {budgetItem.subtask_description && (
                                           <div><strong>Subtask:</strong> {budgetItem.subtask_description}</div>
                                         )}
+                                        {budgetItem.task_unit && (
+                                          <div><strong>Unit:</strong> {budgetItem.task_unit}</div>
+                                        )}
                                       </div>
                                     ) : null;
                                   })()}
@@ -689,6 +692,9 @@ const Index = () => {
                                                     )}
                                                     {budgetItem.subtask_description && (
                                                       <div><strong>Subtask:</strong> {budgetItem.subtask_description}</div>
+                                                    )}
+                                                    {budgetItem.task_unit && (
+                                                      <div><strong>Unit:</strong> {budgetItem.task_unit}</div>
                                                     )}
                                                   </div>
                                                 ) : null;
