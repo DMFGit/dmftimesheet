@@ -21,16 +21,22 @@ export const AuthForm = () => {
 
   const handleMicrosoftSignIn = async () => {
     console.log('Microsoft sign-in button clicked');
+    console.log('Current window location:', window.location.href);
     setLoading(true);
     
     try {
       console.log('Attempting to sign in with Azure OAuth...');
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Redirect URL will be:', `${window.location.origin}/`);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
         options: {
           redirectTo: `${window.location.origin}/`,
         },
       });
+
+      console.log('OAuth response data:', data);
+      console.log('OAuth response error:', error);
 
       if (error) {
         console.error('Microsoft OAuth error:', error);
@@ -40,7 +46,14 @@ export const AuthForm = () => {
           variant: "destructive",
         });
       } else {
-        console.log('Microsoft OAuth initiated successfully');
+        console.log('Microsoft OAuth response successful:', data);
+        // Check if we should be redirected
+        if (data?.url) {
+          console.log('Redirecting to:', data.url);
+          window.location.href = data.url;
+        } else {
+          console.warn('No redirect URL returned from OAuth');
+        }
       }
     } catch (error) {
       console.error('Microsoft sign-in error:', error);
