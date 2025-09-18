@@ -61,7 +61,7 @@ export const useTimeEntries = () => {
   const fetchBudgetData = async () => {
     // Fetch budget items using secure function (admin only)
     const { data: budgetData, error: budgetError } = await supabase
-      .rpc('get_budget_items_secure');
+      .rpc('get_budget_data_admin_only');
 
     if (budgetError) {
       console.error('Error fetching budget items:', budgetError);
@@ -70,9 +70,9 @@ export const useTimeEntries = () => {
 
     setBudgetItems(budgetData || []);
 
-    // Fetch project hierarchy using secure function (authenticated users)
+    // Fetch project data using secure function (admin only)
     const { data: projectData, error: projectError } = await supabase
-      .rpc('get_project_hierarchy_secure');
+      .rpc('get_project_data_admin_only');
 
     if (projectError) {
       console.error('Error fetching projects:', projectError);
@@ -81,9 +81,9 @@ export const useTimeEntries = () => {
 
     setProjects(projectData || []);
 
-    // Fetch task hierarchy using secure function (authenticated users)
+    // Fetch task data using secure function (admin only)
     const { data: taskData, error: taskError } = await supabase
-      .rpc('get_task_hierarchy_secure');
+      .rpc('get_task_data_admin_only');
 
     if (taskError) {
       console.error('Error fetching tasks:', taskError);
