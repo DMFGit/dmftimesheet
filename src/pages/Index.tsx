@@ -634,7 +634,7 @@ const Index = () => {
                                   {project.projectName}
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent className="max-w-xs">
+                              <TooltipContent className="max-w-xs bg-yellow-100 border-yellow-300">
                                 <div className="space-y-1">
                                   <div className="font-semibold">{project.projectName}</div>
                                   {(() => {
@@ -677,32 +677,32 @@ const Index = () => {
                                              {hours}h
                                            </Badge>
                                          </TooltipTrigger>
-                                         <TooltipContent className="max-w-xs">
-                                           <div className="space-y-1">
-                                             <div className="font-semibold">{hours} hours</div>
-                                             {(() => {
-                                               const budgetItem = budgetItems.find(item => item.wbs_code === projectKey);
-                                               return budgetItem ? (
-                                                 <div className="text-sm space-y-1">
-                                                   {budgetItem.task_description && (
-                                                     <div><strong>Task:</strong> {budgetItem.task_description}</div>
-                                                   )}
-                                                   {budgetItem.subtask_description && (
-                                                     <div><strong>Subtask:</strong> {budgetItem.subtask_description}</div>
-                                                   )}
-                                                 </div>
-                                               ) : null;
-                                             })()}
-                                             {descriptions.length > 0 && (
-                                               <div className="text-sm border-t pt-1 mt-2">
-                                                 <div className="font-medium mb-1">Notes:</div>
-                                                 {descriptions.map((desc, i) => (
-                                                   <div key={i}>• {desc}</div>
-                                                 ))}
-                                               </div>
-                                             )}
-                                           </div>
-                                         </TooltipContent>
+                                          <TooltipContent className="max-w-xs bg-yellow-100 border-yellow-300">
+                                            <div className="space-y-1">
+                                              <div className="font-semibold">{hours} hours</div>
+                                              {(() => {
+                                                const budgetItem = budgetItems.find(item => item.wbs_code === projectKey);
+                                                return budgetItem ? (
+                                                  <div className="text-sm space-y-1">
+                                                    {budgetItem.task_description && (
+                                                      <div><strong>Task:</strong> {budgetItem.task_description}</div>
+                                                    )}
+                                                    {budgetItem.subtask_description && (
+                                                      <div><strong>Subtask:</strong> {budgetItem.subtask_description}</div>
+                                                    )}
+                                                  </div>
+                                                ) : null;
+                                              })()}
+                                              {descriptions.length > 0 && (
+                                                <div className="text-sm border-t pt-1 mt-2">
+                                                  <div className="font-medium mb-1">Notes:</div>
+                                                  {descriptions.map((desc, i) => (
+                                                    <div key={i}>• {desc}</div>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </TooltipContent>
                                        </Tooltip>
                                        
                                        {/* Red warning indicator for rejected entries */}
