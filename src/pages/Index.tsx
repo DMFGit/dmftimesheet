@@ -628,9 +628,31 @@ const Index = () => {
                       return (
                         <tr key={projectKey} className="hover:bg-muted/50">
                           <td className="p-3 border-b border-border">
-                            <div className="font-medium text-sm">
-                              {project.projectName}
-                            </div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="font-medium text-sm cursor-help">
+                                  {project.projectName}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <div className="space-y-1">
+                                  <div className="font-semibold">{project.projectName}</div>
+                                  {(() => {
+                                    const budgetItem = budgetItems.find(item => item.wbs_code === projectKey);
+                                    return budgetItem ? (
+                                      <div className="text-sm space-y-1">
+                                        {budgetItem.task_description && (
+                                          <div><strong>Task:</strong> {budgetItem.task_description}</div>
+                                        )}
+                                        {budgetItem.subtask_description && (
+                                          <div><strong>Subtask:</strong> {budgetItem.subtask_description}</div>
+                                        )}
+                                      </div>
+                                    ) : null;
+                                  })()}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                             <div className="text-xs text-muted-foreground">
                               {projectKey}
                             </div>
@@ -889,7 +911,24 @@ const Index = () => {
                             )}
                           </div>
                           
-                          <h3 className="font-semibold text-lg mb-1">{entry.projectName}</h3>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <h3 className="font-semibold text-lg mb-1 cursor-help">{entry.projectName}</h3>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="space-y-1">
+                                <div className="font-semibold">{entry.projectName}</div>
+                                <div className="text-sm space-y-1">
+                                  {entry.taskDescription && (
+                                    <div><strong>Task:</strong> {entry.taskDescription}</div>
+                                  )}
+                                  {entry.subtaskDescription && (
+                                    <div><strong>Subtask:</strong> {entry.subtaskDescription}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
                           
                           <div className="space-y-1 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
