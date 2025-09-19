@@ -21,74 +21,10 @@ export const PasswordResetForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have a valid password reset session
-    const checkSession = async () => {
-      console.log('🔍 Password Reset Debug - Starting session check');
-      console.log('Current URL:', window.location.href);
-      console.log('Search params:', window.location.search);
-      console.log('Hash:', window.location.hash);
-      
-      // Check URL parameters first
-      const urlParams = new URLSearchParams(window.location.search);
-      const accessToken = urlParams.get('access_token');
-      const refreshToken = urlParams.get('refresh_token');
-      const type = urlParams.get('type');
-      
-      console.log('URL Params - access_token:', accessToken ? 'present' : 'null');
-      console.log('URL Params - refresh_token:', refreshToken ? 'present' : 'null');
-      console.log('URL Params - type:', type);
-      
-      // If we have recovery type in URL, this is a valid reset session
-      if (type === 'recovery') {
-        console.log('✅ Found recovery type in URL params - valid reset session');
-        setIsValidSession(true);
-        return;
-      }
-      
-      // Check if user came from a password reset email (alternative check)
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session ? 'exists' : 'null');
-      
-      // Check if the session was created recently (within last 5 minutes) which might indicate a reset flow
-      if (session?.user && accessToken) {
-        console.log('✅ Found session with access token - valid reset session');
-        setIsValidSession(true);
-        return;
-      }
-      
-      // If we have a hash fragment that might contain tokens, try to parse it
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const hashAccessToken = hashParams.get('access_token');
-      const hashType = hashParams.get('type');
-      
-      console.log('Hash Params - access_token:', hashAccessToken ? 'present' : 'null');
-      console.log('Hash Params - type:', hashType);
-      
-      if (hashType === 'recovery' && hashAccessToken) {
-        console.log('✅ Found recovery type in hash - valid reset session');
-        setIsValidSession(true);
-        return;
-      }
-      
-      // Check if there's any session at all that might be a recovery session
-      if (session?.user) {
-        console.log('⚠️ Found session but no clear reset indicators - allowing for now');
-        setIsValidSession(true);
-        return;
-      }
-      
-      console.log('❌ No valid reset indicators found - redirecting to login');
-      // If no valid reset indicators found, redirect to login
-      toast({
-        title: "Invalid Reset Link", 
-        description: "This password reset link is invalid or has expired. Please request a new one.",
-        variant: "destructive",
-      });
-      navigate('/');
-    };
-
-    checkSession();
-  }, [navigate, toast]);
+    // For password reset, we'll be more permissive and allow the page to show
+    // The main validation will be when they actually try to update the password
+    setIsValidSession(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
