@@ -458,6 +458,21 @@ export type Database = {
           project_number: number
         }[]
       }
+      get_project_hierarchy_employee: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          contract: string
+          fee_structure: string
+          project_name: string
+          project_number: number
+          subtask_description: string
+          subtask_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
+          wbs_code: string
+        }[]
+      }
       get_task_data_admin_only: {
         Args: Record<PropertyKey, never>
         Returns: {

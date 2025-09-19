@@ -59,38 +59,101 @@ export const useTimeEntries = () => {
   };
 
   const fetchBudgetData = async () => {
-    // Fetch budget items using secure function (admin only)
-    const { data: budgetData, error: budgetError } = await supabase
-      .rpc('get_budget_data_admin_only');
+    if (!employee) return;
 
-    if (budgetError) {
-      console.error('Error fetching budget items:', budgetError);
-      return;
+    if (employee.role === 'admin') {
+      // Admin: Use separate functions that include financial data
+      const { data: budgetData, error: budgetError } = await supabase
+        .rpc('get_budget_data_admin_only');
+
+      if (budgetError) {
+        console.error('Error fetching budget items:', budgetError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch project data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setBudgetItems(budgetData || []);
+
+      // Fetch project data
+      const { data: projectData, error: projectError } = await supabase
+        .rpc('get_project_data_admin_only');
+
+      if (projectError) {
+        console.error('Error fetching projects:', projectError);
+        return;
+      }
+
+      setProjects(projectData || []);
+
+      // Fetch task data
+      const { data: taskData, error: taskError } = await supabase
+        .rpc('get_task_data_admin_only');
+
+      if (taskError) {
+        console.error('Error fetching tasks:', taskError);
+        return;
+      }
+
+      setTasks(taskData || []);
+    } else {
+      // Employee: Use single function that excludes financial data
+      const { data: hierarchyData, error: hierarchyError } = await supabase
+        .rpc('get_project_hierarchy_employee');
+
+      if (hierarchyError) {
+        console.error('Error fetching project hierarchy:', hierarchyError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch project data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Transform employee data to match BudgetItem type (add missing financial fields)
+      const budgetItemsWithDefaults = (hierarchyData || []).map(item => ({
+        ...item,
+        budget_amount: 0, // Hidden from employees
+        dmf_budget_amount: 0 // Hidden from employees
+      }));
+
+      setBudgetItems(budgetItemsWithDefaults);
+
+      // Extract unique projects from hierarchy data
+      const uniqueProjects = Array.from(
+        new Map(
+          (hierarchyData || []).map(item => [
+            item.project_number,
+            {
+              project_number: item.project_number,
+              project_name: item.project_name,
+              contract: item.contract
+            }
+          ])
+        ).values()
+      );
+      setProjects(uniqueProjects);
+
+      // Extract unique tasks from hierarchy data
+      const uniqueTasks = Array.from(
+        new Map(
+          (hierarchyData || []).map(item => [
+            `${item.project_number}-${item.task_number}`,
+            {
+              project_number: item.project_number,
+              task_number: item.task_number,
+              task_description: item.task_description,
+              task_unit: item.task_unit
+            }
+          ])
+        ).values()
+      );
+      setTasks(uniqueTasks);
     }
-
-    setBudgetItems(budgetData || []);
-
-    // Fetch project data using secure function (admin only)
-    const { data: projectData, error: projectError } = await supabase
-      .rpc('get_project_data_admin_only');
-
-    if (projectError) {
-      console.error('Error fetching projects:', projectError);
-      return;
-    }
-
-    setProjects(projectData || []);
-
-    // Fetch task data using secure function (admin only)
-    const { data: taskData, error: taskError } = await supabase
-      .rpc('get_task_data_admin_only');
-
-    if (taskError) {
-      console.error('Error fetching tasks:', taskError);
-      return;
-    }
-
-    setTasks(taskData || []);
   };
 
   const addTimeEntry = async (entryData: {
