@@ -2,12 +2,34 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
 
-// Tightened CORS headers for improved security
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://c3a57c17-3ced-485e-b8c7-1925931e7c9f.lovableproject.com',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Max-Age': '86400', // Cache preflight for 24 hours
+// Environment-based CORS headers for security
+const getAllowedOrigins = () => {
+  const origins = [
+    'https://timesheet.dmfengineering.com', // Production domain
+    'https://c3a57c17-3ced-485e-b8c7-1925931e7c9f.lovableproject.com', // Preview domain
+  ];
+  
+  // Allow localhost for development
+  if (Deno.env.get('ENVIRONMENT') === 'development') {
+    origins.push('http://localhost:5173', 'http://localhost:3000');
+  }
+  
+  return origins;
+};
+
+const getCorsHeaders = (origin: string | null) => {
+  const allowedOrigins = getAllowedOrigins();
+  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400', // Cache preflight for 24 hours
+    'Content-Security-Policy': "default-src 'none'", // Security header
+    'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+    'X-Frame-Options': 'DENY', // Prevent clickjacking
+  };
 };
 
 interface NotificationRequest {
@@ -29,10 +51,69 @@ interface NotificationRequest {
   reviewNotes?: string;
 }
 
+// Input validation functions
+const validateUUID = (uuid: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
+const validateNotificationRequest = (data: any): data is NotificationRequest => {
+  if (!data || typeof data !== 'object') return false;
+  
+  // Validate required fields
+  if (!data.type || !['time_entry_approved', 'time_entry_rejected', 'timesheet_submitted'].includes(data.type)) {
+    return false;
+  }
+  
+  if (!data.employeeId || !validateUUID(data.employeeId)) {
+    return false;
+  }
+  
+  // Validate entry details if present
+  if (data.entryDetails) {
+    if (!data.entryDetails.date || !data.entryDetails.hours || !data.entryDetails.wbsCode) {
+      return false;
+    }
+    if (typeof data.entryDetails.hours !== 'number' || data.entryDetails.hours <= 0) {
+      return false;
+    }
+  }
+  
+  // Validate week details if present
+  if (data.weekDetails) {
+    if (!data.weekDetails.weekStart || !data.weekDetails.weekEnd || 
+        typeof data.weekDetails.totalHours !== 'number' || 
+        typeof data.weekDetails.entryCount !== 'number') {
+      return false;
+    }
+  }
+  
+  // Sanitize review notes if present
+  if (data.reviewNotes && typeof data.reviewNotes === 'string') {
+    data.reviewNotes = data.reviewNotes.trim().substring(0, 1000); // Limit length
+  }
+  
+  return true;
+};
+
 serve(async (req) => {
+  const origin = req.headers.get('Origin');
+  const corsHeaders = getCorsHeaders(origin);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+  
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Method not allowed' }),
+      { 
+        status: 405, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 
   try {
@@ -43,13 +124,38 @@ serve(async (req) => {
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
+    // Parse and validate request body
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid JSON in request body' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    // Validate request data
+    if (!validateNotificationRequest(requestData)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid request data' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     const { 
       type, 
       employeeId, 
       entryDetails, 
       weekDetails,
       reviewNotes 
-    }: NotificationRequest = await req.json();
+    }: NotificationRequest = requestData;
 
     console.log('Sending notification for:', type, 'to employee:', employeeId);
 
@@ -61,7 +167,14 @@ serve(async (req) => {
       .single();
 
     if (employeeError || !employee) {
-      throw new Error('Employee not found');
+      console.error('Employee lookup failed:', employeeError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Employee not found' }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Handle timesheet submission notification
@@ -282,10 +395,15 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in send-notification function:', error);
+    
+    // Don't expose internal error details in production
+    const isProduction = Deno.env.get('ENVIRONMENT') === 'production';
+    const errorMessage = isProduction ? 'Internal server error' : error.message;
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: errorMessage
       }),
       {
         status: 500,
