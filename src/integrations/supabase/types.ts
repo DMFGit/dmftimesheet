@@ -473,6 +473,23 @@ export type Database = {
           wbs_code: string
         }[]
       }
+      get_project_hierarchy_employee_debug: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          auth_uid_debug: string
+          contract: string
+          employee_count_debug: number
+          fee_structure: string
+          project_name: string
+          project_number: number
+          subtask_description: string
+          subtask_number: number
+          task_description: string
+          task_number: number
+          task_unit: string
+          wbs_code: string
+        }[]
+      }
       get_task_data_admin_only: {
         Args: Record<PropertyKey, never>
         Returns: {
