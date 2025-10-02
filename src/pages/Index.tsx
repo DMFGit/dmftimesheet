@@ -299,17 +299,17 @@ const Index = () => {
       return;
     }
 
-    const subtaskNumber = quickEntryForm.subtaskId ? parseFloat(quickEntryForm.subtaskId) : 0;
+    const subtaskNumber = quickEntryForm.subtaskId ? parseFloat(quickEntryForm.subtaskId) : null;
     const budgetItem = budgetItems.find(item => 
       item.project_number === parseInt(quickEntryForm.projectId) &&
       item.task_number === parseInt(quickEntryForm.taskId) &&
-      item.subtask_number === subtaskNumber
+      (subtaskNumber === null ? item.subtask_number === null : item.subtask_number === subtaskNumber)
     );
     
     if (!budgetItem) {
       toast({
         title: "Error",
-        description: "Could not find WBS code for selected subtask",
+        description: subtaskNumber === null ? "Could not find WBS code for selected task" : "Could not find WBS code for selected subtask",
         variant: "destructive"
       });
       return;
