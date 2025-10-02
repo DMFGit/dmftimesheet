@@ -300,11 +300,40 @@ const Index = () => {
     }
 
     const subtaskNumber = quickEntryForm.subtaskId ? parseFloat(quickEntryForm.subtaskId) : null;
+    
+    console.log('DEBUG - Looking for WBS code with:', {
+      projectId: quickEntryForm.projectId,
+      taskId: quickEntryForm.taskId,
+      subtaskId: quickEntryForm.subtaskId,
+      projectNumber: parseInt(quickEntryForm.projectId),
+      taskNumber: parseInt(quickEntryForm.taskId),
+      subtaskNumber
+    });
+    
+    const matchingItems = budgetItems.filter(item => 
+      item.project_number === parseInt(quickEntryForm.projectId) &&
+      item.task_number === parseInt(quickEntryForm.taskId)
+    );
+    
+    console.log('DEBUG - Matching items for project/task:', matchingItems.map(item => ({
+      project: item.project_number,
+      task: item.task_number,
+      subtask: item.subtask_number,
+      wbs: item.wbs_code
+    })));
+    
     const budgetItem = budgetItems.find(item => 
       item.project_number === parseInt(quickEntryForm.projectId) &&
       item.task_number === parseInt(quickEntryForm.taskId) &&
       (subtaskNumber === null ? item.subtask_number === null : item.subtask_number === subtaskNumber)
     );
+    
+    console.log('DEBUG - Found budgetItem:', budgetItem ? {
+      wbs: budgetItem.wbs_code,
+      project: budgetItem.project_number,
+      task: budgetItem.task_number,
+      subtask: budgetItem.subtask_number
+    } : 'NOT FOUND');
     
     if (!budgetItem) {
       toast({
