@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { AuthForm } from "@/components/auth/AuthForm";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye, Edit, Trash2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Plus, History, CalendarDays, TrendingUp, Users, CheckCircle, Grid, List, Eye, Edit, Trash2, AlertTriangle, CalendarIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTimeEntries } from "@/hooks/useTimeEntries";
 import { useToast } from "@/hooks/use-toast";
@@ -1069,11 +1071,43 @@ const Index = () => {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
-                {editingEntry ? 'Edit Time Entry' : 'Add Time Entry'} - {quickEntryForm.selectedDate ? format(parseDateSafe(quickEntryForm.selectedDate), 'MMM d, yyyy') : ''}
+                {editingEntry ? 'Edit Time Entry' : 'Add Time Entry'}
               </DialogTitle>
             </DialogHeader>
             
             <div className="space-y-6">
+              {/* Date Picker */}
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {quickEntryForm.selectedDate ? format(parseDateSafe(quickEntryForm.selectedDate), 'PPP') : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={quickEntryForm.selectedDate ? parseDateSafe(quickEntryForm.selectedDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          updateQuickEntryForm('selectedDate', format(date, 'yyyy-MM-dd'));
+                        }
+                      }}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("2020-01-01")
+                      }
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               {/* Entry Mode Toggle */}
               <div className="flex items-center justify-center space-x-2 p-1 bg-muted rounded-lg">
                 <Button
