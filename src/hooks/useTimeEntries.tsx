@@ -386,25 +386,8 @@ export const useTimeEntries = () => {
     getSubtasksByTask: (projectId: string, taskId: string) => {
       const projectNumber = parseInt(projectId);
       const taskNumber = parseInt(taskId);
-      
-      console.log('getSubtasksByTask called with:', { projectId, taskId, projectNumber, taskNumber });
-      
-      const filtered = budgetItems.filter(item => {
-        const matches = item.project_number === projectNumber && 
-                       item.task_number === taskNumber && 
-                       item.subtask_number != null;
-        if (matches) {
-          console.log('Matched item:', { 
-            project: item.project_number, 
-            task: item.task_number, 
-            subtask: item.subtask_number,
-            wbs: item.wbs_code 
-          });
-        }
-        return matches;
-      });
-      
-      return filtered
+      return budgetItems
+        .filter(item => item.project_number === projectNumber && item.task_number === taskNumber && item.subtask_number != null)
         .map(item => ({
           id: item.subtask_number!.toString(),
           task_id: taskNumber.toString(),
