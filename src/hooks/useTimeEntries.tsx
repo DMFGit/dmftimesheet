@@ -316,11 +316,11 @@ export const useTimeEntries = () => {
         });
       }
     });
-    return Array.from(unique.values());
+    return Array.from(unique.values()).sort((a, b) => a.project_number - b.project_number);
   };
   
   const getTasksByProject = (projectNumber: number) => 
-    tasks.filter(t => t.project_number === projectNumber);
+    tasks.filter(t => t.project_number === projectNumber).sort((a, b) => a.task_number - b.task_number);
   
   const getBudgetItemsByProject = (projectNumber: number) => 
     budgetItems.filter(item => item.project_number === projectNumber);
@@ -395,7 +395,8 @@ export const useTimeEntries = () => {
           wbs_code: item.wbs_code || '',
           budget: item.budget_amount || 0,
           fee_structure: item.fee_structure || '',
-        }));
+        }))
+        .sort((a, b) => parseFloat(a.number) - parseFloat(b.number));
     },
     refreshData: fetchTimeEntries,
   };
