@@ -371,7 +371,7 @@ export const NewTimeEntryForm = ({ onSubmit, selectedDate }: TimeEntryFormProps)
                         <SelectValue placeholder="Select subtask" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover z-50">
-                        {getSubtasksByTask(entry.taskId).map((subtask) => {
+                        {getSubtasksByTask(entry.projectId, entry.taskId).map((subtask) => {
                           const parentTask = getTasksByProject(parseInt(entry.projectId)).find(t => t.task_number.toString() === entry.taskId);
                           return (
                             <SelectItem key={subtask.id} value={subtask.id}>

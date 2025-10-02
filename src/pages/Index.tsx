@@ -1265,7 +1265,7 @@ const Index = () => {
                           <SelectValue placeholder="Select subtask" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
-                          {getSubtasksByTask(quickEntryForm.taskId).map((subtask) => {
+                          {getSubtasksByTask(quickEntryForm.projectId, quickEntryForm.taskId).map((subtask) => {
                             const parentTask = getTasksByProject(parseInt(quickEntryForm.projectId)).find(t => t.task_number.toString() === quickEntryForm.taskId);
                             return (
                               <SelectItem key={subtask.id} value={subtask.id}>

@@ -383,10 +383,11 @@ export const useTimeEntries = () => {
     getProjectById,
     getTaskById,
     getSubtaskById,
-    getSubtasksByTask: (taskId: string) => {
+    getSubtasksByTask: (projectId: string, taskId: string) => {
+      const projectNumber = parseInt(projectId);
       const taskNumber = parseInt(taskId);
       return budgetItems
-        .filter(item => item.task_number === taskNumber && item.subtask_number != null)
+        .filter(item => item.project_number === projectNumber && item.task_number === taskNumber && item.subtask_number != null)
         .map(item => ({
           id: item.subtask_number!.toString(),
           task_id: taskNumber.toString(),
