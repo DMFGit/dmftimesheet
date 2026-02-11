@@ -172,7 +172,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -184,7 +184,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -196,7 +196,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -380,7 +380,7 @@ export type Database = {
         Returns: string
       }
       get_budget_data_admin_only: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           budget_amount: number
           contract: string
@@ -397,7 +397,7 @@ export type Database = {
         }[]
       }
       get_budget_items: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           budget_amount: number
           contract: string
@@ -414,7 +414,7 @@ export type Database = {
         }[]
       }
       get_budget_items_secure: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           budget_amount: number
           contract: string
@@ -430,12 +430,9 @@ export type Database = {
           wbs_code: string
         }[]
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_role: { Args: never; Returns: string }
       get_employee_data_admin_only: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active: boolean
           default_billing_rate: number
@@ -451,7 +448,7 @@ export type Database = {
         Returns: string
       }
       get_project_data_admin_only: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           contract: string
           project_name: string
@@ -459,7 +456,7 @@ export type Database = {
         }[]
       }
       get_project_hierarchy_employee: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           contract: string
           fee_structure: string
@@ -474,7 +471,7 @@ export type Database = {
         }[]
       }
       get_task_data_admin_only: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           project_number: number
           task_description: string
@@ -482,10 +479,7 @@ export type Database = {
           task_unit: string
         }[]
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       log_security_event: {
         Args: {
           p_action_type: string
