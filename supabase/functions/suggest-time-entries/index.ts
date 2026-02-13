@@ -61,6 +61,7 @@ RULES:
                         entry_date: { type: "string", description: "Date in YYYY-MM-DD format" },
                         project_name: { type: "string", description: "Name of the project for display" },
                         task_description: { type: "string", description: "Task description for display" },
+                        subtask_description: { type: "string", description: "Subtask description for display, if applicable" },
                       },
                       required: ["wbs_code", "hours", "description", "entry_date", "project_name", "task_description"],
                       additionalProperties: false,

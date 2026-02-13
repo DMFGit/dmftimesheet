@@ -16,6 +16,7 @@ interface TimeSuggestion {
   entry_date: string;
   project_name: string;
   task_description: string;
+  subtask_description?: string;
 }
 
 interface VoiceTimesheetEntryProps {
@@ -267,7 +268,11 @@ export function VoiceTimesheetEntry({ budgetItems, onAddEntries }: VoiceTimeshee
                           </Badge>
                         </div>
                         <p className="text-sm font-medium mt-1 truncate">{suggestion.project_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{suggestion.task_description}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {suggestion.task_description}
+                          {suggestion.subtask_description ? ` → ${suggestion.subtask_description}` : ""}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground/70 font-mono truncate">{suggestion.wbs_code}</p>
                         <p className="text-xs mt-1">{suggestion.description}</p>
                       </div>
                       <div className="shrink-0">
