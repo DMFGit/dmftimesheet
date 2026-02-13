@@ -1,0 +1,1 @@
+DELETE FROM "Time_Entries" WHERE employee_id IN (SELECT id FROM "Employees" WHERE role = 'admin');
