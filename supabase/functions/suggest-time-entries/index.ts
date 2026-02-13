@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { transcript, projectHierarchy } = await req.json();
+    const { transcript, projectHierarchy, localDate } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -22,10 +22,11 @@ RULES:
 - Match the described work to the most appropriate project/task/subtask from the hierarchy
 - Each suggestion needs: wbs_code, hours, description, entry_date (YYYY-MM-DD format)
 - Hours should be in 0.5 increments
+- If the user mentions "today", use exactly this date: ${localDate || new Date().toISOString().split('T')[0]}
 - If the user mentions specific days, use those. Otherwise distribute across the current work week (Mon-Fri)
+- The current local date for the user is: ${localDate || new Date().toISOString().split('T')[0]}
 - The description should be concise (1-2 sentences)
 - Only suggest entries for work that matches available projects
-- Current date context: ${new Date().toISOString().split('T')[0]}
 - The work week starts on Monday`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
