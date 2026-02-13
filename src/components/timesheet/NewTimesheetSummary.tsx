@@ -52,13 +52,13 @@ export const NewTimesheetSummary = ({ entries, date, onSubmitForReview }: Timesh
                   </h4>
                   <p className="text-sm text-muted-foreground">
                     {budgetItem?.task_number} - {budgetItem?.task_description}
+                    {budgetItem?.subtask_number != null && (
+                      <span> → {budgetItem.subtask_number} - {budgetItem.subtask_description}</span>
+                    )}
                   </p>
                   {budgetItem && (
-                    <p className="text-xs text-muted-foreground">
-                      {budgetItem.subtask_number} - {budgetItem.subtask_description}
-                      <span className="ml-2 font-mono bg-secondary px-1 rounded">
-                        {budgetItem.wbs_code}
-                      </span>
+                    <p className="text-xs text-muted-foreground/70 font-mono">
+                      {budgetItem.wbs_code}
                     </p>
                   )}
                   {entry.description && (
