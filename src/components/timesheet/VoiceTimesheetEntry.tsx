@@ -111,8 +111,12 @@ export function VoiceTimesheetEntry({ budgetItems, onAddEntries }: VoiceTimeshee
         subtask_description: item.subtask_description,
       }));
 
+      // Get local date string to avoid UTC timezone issues
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
       const { data, error } = await supabase.functions.invoke("suggest-time-entries", {
-        body: { transcript: transcript.trim(), projectHierarchy: hierarchy },
+        body: { transcript: transcript.trim(), projectHierarchy: hierarchy, localDate },
       });
 
       if (error) throw error;
