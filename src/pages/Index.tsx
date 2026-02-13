@@ -726,7 +726,20 @@ const Index = () => {
                             <td className="p-3 border-b border-border">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="font-medium text-sm cursor-help">{project.projectName}</div>
+                                  <div className="cursor-help">
+                                    <div className="font-medium text-sm">{project.projectName}</div>
+                                    {(() => {
+                                      const budgetItem = budgetItems.find((item) => item.wbs_code === projectKey);
+                                      if (!budgetItem) return null;
+                                      const parts = [budgetItem.task_description];
+                                      if (budgetItem.subtask_description) parts.push(budgetItem.subtask_description);
+                                      return (
+                                        <div className="text-xs text-muted-foreground truncate max-w-[160px]">
+                                          {parts.join(" → ")}
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs bg-warning-light border-warning">
                                   <div className="space-y-1">
@@ -756,7 +769,7 @@ const Index = () => {
                                   </div>
                                 </TooltipContent>
                               </Tooltip>
-                              <div className="text-xs text-muted-foreground">{projectKey}</div>
+                              <div className="text-xs text-muted-foreground/70 font-mono">{projectKey}</div>
                             </td>
                             {weekDays.map((day, index) => {
                               const dayKey = format(day, "yyyy-MM-dd");
