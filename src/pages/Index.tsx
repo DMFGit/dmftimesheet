@@ -37,6 +37,7 @@ import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay } from "dat
 import { parseDateSafe } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry } from "@/types/timesheet";
+import { VoiceTimesheetEntry } from "@/components/timesheet/VoiceTimesheetEntry";
 
 // Constants
 const HOURS_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
@@ -680,10 +681,20 @@ const Index = () => {
                   <Clock className="h-5 w-5" />
                   Time Entry Summary
                 </CardTitle>
-                <Button size="sm" onClick={() => openQuickEntry(format(new Date(), "yyyy-MM-dd"))}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Entry
-                </Button>
+                <div className="flex items-center gap-2">
+                  <VoiceTimesheetEntry
+                    budgetItems={budgetItems}
+                    onAddEntries={async (entries) => {
+                      for (const entry of entries) {
+                        await addTimeEntry(entry);
+                      }
+                    }}
+                  />
+                  <Button size="sm" onClick={() => openQuickEntry(format(new Date(), "yyyy-MM-dd"))}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Entry
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
